@@ -264,7 +264,7 @@ pipeline {
                         -H "Content-Type: application/json" \
                         -H "Authorization: token $gitToken" \
                         -X POST \
-                        -d '{"state": "pending","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test running", "target_url": "https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
+                        -d '{"state": "pending","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test running", "target_url": "https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
                         """
                         
                         def sh1= """
@@ -455,7 +455,7 @@ pipeline {
                             -H "Content-Type: application/json" \
                             -H "Authorization: token $gitToken" \
                             -X POST \
-                            -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test is successful", "target_url": "https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
+                            -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test is successful", "target_url": "https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
                             echo "#############Job is Successful############"
                             echo "##############Sending E-Mail###############"
                             echo "Recipient is:$eMailID"
@@ -471,7 +471,7 @@ pipeline {
                             -H "Content-Type: application/json" \
                             -H "Authorization: token $gitToken" \
                             -X POST \
-                            -d '{"state": "failure","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test failed", "target_url": "https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
+                            -d '{"state": "failure","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test failed", "target_url": "https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
                             echo "#############Job is Successful############"
                             echo "##############Sending E-Mail###############"
                             echo "Recipient is: weiwang@ucar.edu"
@@ -498,9 +498,9 @@ pipeline {
                 -H "Content-Type: application/json" \
                 -H "Authorization: token $gitToken" \
                 -X POST \
-                -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test not required.", "target_url": "https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
+                -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test not required.", "target_url": "https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
                 echo "#############Job Failed############"
-                sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "weiwang@ucar.edu" "vlakshmanan@scalacomputing.com,ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER : Status: Failed" "Jenkins build failed. https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"
+                sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "weiwang@ucar.edu" "vlakshmanan@scalacomputing.com,ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER : Status: Failed" "Jenkins build failed. https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"
                 echo "Cleaning workspace"
                 sudo -S rm -rf $WORKSPACE/$BUILD_NUMBER
                 sudo -S rm -rf /tmp/raw_output_$BUILD_NUMBER
@@ -519,9 +519,9 @@ pipeline {
                 -H "Content-Type: application/json" \
                 -H "Authorization: token $gitToken" \
                 -X POST \
-                -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test not required", "target_url": "https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
+                -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test not required", "target_url": "https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
                 echo "#############Job Aborted############"
-                sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com,weiwang@ucar.edu" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER : Status: Aborted" "Jenkins build aborted because WRF regression test not required. https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"
+                sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com,weiwang@ucar.edu" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER : Status: Aborted" "Jenkins build aborted because WRF regression test not required. https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"
                 echo "Cleaning workspace"
                 cd $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform && sudo terraform destroy -auto-approve || true
                 sudo -S rm -rf $WORKSPACE/$BUILD_NUMBER
