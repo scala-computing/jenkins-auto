@@ -230,7 +230,7 @@ pipeline {
 
         stage('Setting Variables From Webhook Payload') {
             steps ("Setting variables") {
-                withCredentials([string(credentialsId: 'git-token', variable: 'gitToken')]) {
+                withCredentials([string(credentialsId: 'vl-git-token', variable: 'gitToken')]) {
                     sh '''
                     sudo -S mkdir -p $WORKSPACE/$BUILD_NUMBER
                     sudo -S chmod 777 -R $WORKSPACE/$BUILD_NUMBER
@@ -414,7 +414,7 @@ pipeline {
     post {
         success {
             script {
-                withCredentials([string(credentialsId: 'git-token', variable: 'gitToken')]) {
+                withCredentials([string(credentialsId: 'vl-git-token', variable: 'gitToken')]) {
                     /*
                     Setting some more variables for test results
                     */
@@ -490,7 +490,7 @@ pipeline {
         }
 
         failure {
-            withCredentials([string(credentialsId: 'git-token', variable: 'gitToken')]) {
+            withCredentials([string(credentialsId: 'vl-git-token', variable: 'gitToken')]) {
             echo "Job failed. Now sending e-mail notification and cleaning workspace"
             
                 sh """
@@ -511,7 +511,7 @@ pipeline {
         }
 
         aborted {
-            withCredentials([string(credentialsId: 'git-token', variable: 'gitToken')]) {
+            withCredentials([string(credentialsId: 'vl-git-token', variable: 'gitToken')]) {
                 echo "Job Aborted. Now sending e-mail notification and cleaning workspace"   
 
                 sh """
