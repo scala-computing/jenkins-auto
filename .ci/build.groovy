@@ -119,7 +119,7 @@ def terraformStage(stageName) {
             sudo -S chmod 777 -R $WORKSPACE/$BUILD_NUMBER 
             sudo -S mkdir -p $WORKSPACE/$BUILD_NUMBER/WRF 
             echo "Cloning repo into:   $WORKSPACE/$BUILD_NUMBER/WRF "
-            sudo -S git clone --single-branch --branch staging https://github.com/scala-computing/jenkins-auto.git $WORKSPACE/$BUILD_NUMBER/WRF
+            sudo -S git clone --single-branch --branch production https://github.com/scala-computing/jenkins-auto.git $WORKSPACE/$BUILD_NUMBER/WRF
             sudo -S sed -i 's/default = "wrf-test"/default = "wrf-test-${BUILD_NUMBER}"/' $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform/vars.tf
             """        
             if (label=='"DO_KPP_TEST"') {        
@@ -230,7 +230,7 @@ pipeline {
 
         stage('Setting Variables From Webhook Payload') {
             steps ("Setting variables") {
-                withCredentials([string(credentialsId: 'vl-git-token', variable: 'gitToken')]) {
+                withCredentials([string(credentialsId: 'git-token', variable: 'gitToken')]) {
                     sh '''
                     sudo -S mkdir -p $WORKSPACE/$BUILD_NUMBER
                     sudo -S chmod 777 -R $WORKSPACE/$BUILD_NUMBER
@@ -414,7 +414,7 @@ pipeline {
     post {
         success {
             script {
-                withCredentials([string(credentialsId: 'vl-git-token', variable: 'gitToken')]) {
+                withCredentials([string(credentialsId: 'git-token', variable: 'gitToken')]) {
                     /*
                     Setting some more variables for test results
                     */
@@ -490,7 +490,7 @@ pipeline {
         }
 
         failure {
-            withCredentials([string(credentialsId: 'vl-git-token', variable: 'gitToken')]) {
+            withCredentials([string(credentialsId: 'git-token', variable: 'gitToken')]) {
             echo "Job failed. Now sending e-mail notification and cleaning workspace"
             
                 sh """
@@ -500,7 +500,7 @@ pipeline {
                 -X POST \
                 -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test not required.", "target_url": "https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
                 echo "#############Job Failed############"
-                sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "weiwang@ucar.edu" "vlakshmanan@scalacomputing.com,ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER : Status: Failed" "Jenkins build failed. https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"
+                sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com,weiwang@ucar.edu" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER : Status: Failed" "Jenkins build failed. https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"
                 echo "Cleaning workspace"
                 sudo -S rm -rf $WORKSPACE/$BUILD_NUMBER
                 sudo -S rm -rf /tmp/raw_output_$BUILD_NUMBER
@@ -511,7 +511,7 @@ pipeline {
         }
 
         aborted {
-            withCredentials([string(credentialsId: 'vl-git-token', variable: 'gitToken')]) {
+            withCredentials([string(credentialsId: 'git-token', variable: 'gitToken')]) {
                 echo "Job Aborted. Now sending e-mail notification and cleaning workspace"   
 
                 sh """
