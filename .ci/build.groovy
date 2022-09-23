@@ -176,7 +176,7 @@ def killall_jobs() {
     def rmi = """
     sudo -S mkdir -p $WORKSPACE/$BUILD_NUMBER/WRF
     echo "Cloning repo into:   $WORKSPACE/$BUILD_NUMBER/WRF "
-    sudo -S git clone --single-branch --branch staging https://github.com/scala-computing/jenkins-auto.git $WORKSPACE/$BUILD_NUMBER/WRF   
+    sudo -S git clone --single-branch --branch production https://github.com/scala-computing/jenkins-auto.git $WORKSPACE/$BUILD_NUMBER/WRF   
     """
     rm=sh(script: rmi,returnStdout: true)
     def job = Jenkins.instance.getItemByFullName(jobname)
