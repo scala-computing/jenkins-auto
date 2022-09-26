@@ -46,7 +46,7 @@ def appendOutput(stageName) {
                 sudo -S mkdir -p /tmp/coop-repo_$BUILD_NUMBER
                 sudo -S mkdir -p /tmp/Success_files_$BUILD_NUMBER
 
-                sudo -S aws s3 cp s3://wrf-testcase-staging/raw_output/$BUILD_NUMBER/ /tmp/raw_output_$BUILD_NUMBER/ --region us-east-1 --recursive
+                sudo -S aws s3 cp s3://wrf-testcase/raw_output/$BUILD_NUMBER/ /tmp/raw_output_$BUILD_NUMBER/ --region us-east-1 --recursive
                 sudo -S git clone --branch regression+feature https://github.com/wrf-model/wrf-coop.git /tmp/coop-repo_$BUILD_NUMBER/wrf-coop
                 csh /tmp/coop-repo_$BUILD_NUMBER/wrf-coop/build.csh /tmp/coop-repo_$BUILD_NUMBER/wrf-coop /tmp/coop-repo_$BUILD_NUMBER/wrf-coop
                 sh $WORKSPACE/$BUILD_NUMBER/terraform/part.sh
