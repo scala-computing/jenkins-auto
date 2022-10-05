@@ -260,7 +260,7 @@ pipeline {
                     
                         // Github status for current build
                         sh """
-                        curl -s "https://api.GitHub.com/repos/wrf-model/WRF/statuses/$sha" \
+                        curl -s "https://api.GitHub.com/repos/scala-computing/WRF/statuses/$sha" \
                         -H "Content-Type: application/json" \
                         -H "Authorization: token $gitToken" \
                         -X POST \
@@ -352,7 +352,7 @@ pipeline {
                 echo "fork_repo_$BUILD_NUMBER"
                 echo "Pull number is: $pullnumber"
                 def sh9="""
-                curl -s https://patch-diff.githubusercontent.com/raw/wrf-model/WRF/pull/${pullnumber}.patch| grep -i "SUBJECT" | tail -n 1 | awk '{\$1="";\$2="";\$3=""; print \$0}'
+                curl -s https://patch-diff.githubusercontent.com/raw/scala-computing/WRF/pull/${pullnumber}.patch| grep -i "SUBJECT" | tail -n 1 | awk '{\$1="";\$2="";\$3=""; print \$0}'
                 """
                 env.prComment=mysh(sh9)
                 println("Checking for list of file changes in this commit")
@@ -451,7 +451,7 @@ pipeline {
                         if((env.I=="0") && (env.J=="0")) {   
                             sh """
                             echo "Job is successful Because I and J are both zero. Now sending e-mail notification and cleaning workspace"
-                            curl -s "https://api.GitHub.com/repos/wrf-model/WRF/statuses/$sha" \
+                            curl -s "https://api.GitHub.com/repos/scala-computing/WRF/statuses/$sha" \
                             -H "Content-Type: application/json" \
                             -H "Authorization: token $gitToken" \
                             -X POST \
@@ -467,7 +467,7 @@ pipeline {
                         } else {
                             sh """
                             echo "Job has failed because I and J any of them are non-zero. Now sending e-mail notification and cleaning workspace"
-                            curl -s "https://api.GitHub.com/repos/wrf-model/WRF/statuses/$sha" \
+                            curl -s "https://api.GitHub.com/repos/scala-computing/WRF/statuses/$sha" \
                             -H "Content-Type: application/json" \
                             -H "Authorization: token $gitToken" \
                             -X POST \
@@ -494,13 +494,13 @@ pipeline {
             echo "Job failed. Now sending e-mail notification and cleaning workspace"
             
                 sh """
-                curl -s "https://api.GitHub.com/repos/wrf-model/WRF/statuses/$sha" \
+                curl -s "https://api.GitHub.com/repos/scala-computing/WRF/statuses/$sha" \
                 -H "Content-Type: application/json" \
                 -H "Authorization: token $gitToken" \
                 -X POST \
                 -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test not required.", "target_url": "https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
                 echo "#############Job Failed############"
-                sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "hstone@scalacomputing.com" "vlakshmanan@scalacomputing.com,ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: $pullnumber, commit id $commitID, branch name $fork_branchName by $githubuserName has : Status: Failed" "Jenkins build failed. https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"
+                sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "hstone@scalacomputing.com" "vlakshmanan@scalacomputing.com,ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: $pullnumber has : Status: Failed" "Jenkins build with commit id $commitID, branch name $fork_branchName by $githubuserName failed. https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"
                 echo "Cleaning workspace"
                 sudo -S rm -rf $WORKSPACE/$BUILD_NUMBER
                 sudo -S rm -rf /tmp/raw_output_$BUILD_NUMBER
@@ -515,13 +515,13 @@ pipeline {
                 echo "Job Aborted. Now sending e-mail notification and cleaning workspace"   
 
                 sh """
-                curl -s "https://api.GitHub.com/repos/wrf-model/WRF/statuses/$sha" \
+                curl -s "https://api.GitHub.com/repos/scala-computing/WRF/statuses/$sha" \
                 -H "Content-Type: application/json" \
                 -H "Authorization: token $gitToken" \
                 -X POST \
                 -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test not required", "target_url": "https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
                 echo "#############Job Aborted############"
-                sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com,hstone@scalacomputing.com" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: $pullnumber, commit id $commitID, branch name $fork_branchName by $githubuserName has : Status: Aborted" "Jenkins build aborted because WRF regression test not required. https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"
+                sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com,hstone@scalacomputing.com" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: $pullnumber has : Status: Aborted" "Jenkins build with commit id $commitID, branch name $fork_branchName by $githubuserName aborted because WRF regression test not required. https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"
                 echo "Cleaning workspace"
                 cd $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform && sudo terraform destroy -auto-approve || true
                 sudo -S rm -rf $WORKSPACE/$BUILD_NUMBER
