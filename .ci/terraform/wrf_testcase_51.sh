@@ -12,10 +12,10 @@ echo "==============================================================" >> SERIAL
 echo "                         SERIAL START" >> SERIAL
 echo "==============================================================" >> SERIAL
 
-date ; ./single_init.csh Dockerfile     wrf_regtest    > output_7 ; date 
-./test_004s.csh > outs 
-./single_end.csh wrf_regtest    >> output_7 ; date 
-cat SERIAL outs >> output_7
+date ; ./single_init.csh Dockerfile     wrf_regtest    > output_51 ; date 
+./test_020s.csh > outs 
+./single_end.csh wrf_regtest    >> output_51 ; date 
+cat SERIAL outs >> output_51
 rm outs SERIAL 
 date 
 EOF

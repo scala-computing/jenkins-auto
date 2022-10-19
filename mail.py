@@ -33,7 +33,8 @@ O=sys.argv[21]
 P=sys.argv[22]
 
 AWS_REGION = "us-east-1"
-DAVID_GILL="gill@ucar.edu"
+DAVID_GILL="weiwang@ucar.edu"
+#VIKRAM="varunlakshma@usf.edu"
 VIKRAM="vlakshmanan@scalacomputing.com"
 SCALA="ncar-dev@scalacomputing.com"
 f = open(FILE,"r")
@@ -49,8 +50,8 @@ if (I=="0") and (J=="0"):
     <html>
     <head></head>
     <body>
-    <p>Please find result of the WRF regression test cases in the attachment.  This build is for Commit ID: {0}, requested by: {1} for PR: https://github.com/wrf-model/WRF/pull/{2}.
-            For any query please send e-mail to <a href="mailto:gill@ucar.edu">David Gill. </a></p>
+    <p>Please find result of the WRF regression test cases in the attachment.  This build is for Commit ID: {0}, requested by: {1} for PR: https://github.com/scala-computing/WRF/pull/{2}.
+            For any query please send e-mail to <a href="mailto:weiwang@ucar.edu">Wei Wang. </a></p>
     <pre>
     Test Type              | Expected  | Received |  Failed
     = = = = = = = = = = = = = = = = = = = = = = = =  = = = =
@@ -73,8 +74,8 @@ else :
     <html>
     <head></head>
     <body>
-    <p>Please find result of the WRF regression test cases in the attachment.  This build is for Commit ID: {0}, requested by: {1} for PR: https://github.com/wrf-model/WRF/pull/{2}.
-            For any query please send e-mail to <a href="mailto:gill@ucar.edu">David Gill. </a></p>
+    <p>Please find result of the WRF regression test cases in the attachment.  This build is for Commit ID: {0}, requested by: {1} for PR: https://github.com/scala-computing/WRF/pull/{2}.
+            For any query please send e-mail to <a href="mailto:weiwang@ucar.edu">Wei Wang. </a></p>
     <pre>
     Test Type              | Expected  | Received |  Failed
     = = = = = = = = = = = = = = = = = = = = = = = =  = = = =
@@ -97,8 +98,8 @@ HTML_BODY_FAIL="""
 <head></head>
 <body>
   <h1>{}: {}-BUILD-{}</h1>
- <p>This WRF-Model build has {}. This build is for Commit ID: {}, requested by: {} for PR: https://github.com/wrf-model/WRF/pull/{}.
-    For any query please send e-mail to <a href="mailto:gill@ucar.edu">David Gill</a></p>
+ <p>This WRF-Model build has {}. This build is for Commit ID: {}, requested by: {} for PR: https://github.com/scala-computing/WRF/pull/{}.
+    For any query please send e-mail to <a href="mailto:weiwang@ucar.edu">Wei Wang</a></p>
 </body>
 </html>""".format(BUILD_STATUS,JOB_NAME,BUILD_NUMBER,BUILD_STATUS,COMMIT_ID,REQUESTOR,PULLNUMBER)
 
