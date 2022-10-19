@@ -12,7 +12,7 @@ def appendOutput(stageName) {
                 if [ -d "/tmp/raw_output_$BUILD_NUMBER/" ] 
                 then
                     echo "Directory exists."
-                    rm -rf /tmp/raw_output_$BUILD_NUMBER/ 
+                    sudo -S rm -rf /tmp/raw_output_$BUILD_NUMBER/ 
                 else
                     echo "/tmp/raw_output_$BUILD_NUMBER/ not found moving on"
                 fi
@@ -20,7 +20,7 @@ def appendOutput(stageName) {
                 if [ -d "/tmp/raw_output_$BUILD_NUMBER/final_output" ] 
                 then
                     echo "Directory exists."
-                    rm -rf /tmp/raw_output_$BUILD_NUMBER/final_output
+                    sudo -S rm -rf /tmp/raw_output_$BUILD_NUMBER/final_output
                 else
                     echo "/tmp/raw_output_$BUILD_NUMBER/final_output not found moving on"
                 fi
@@ -28,7 +28,7 @@ def appendOutput(stageName) {
                 if [ -d "/tmp/coop-repo_$BUILD_NUMBER" ] 
                 then
                     echo "Directory exists."
-                    rm -rf /tmp/coop-repo_$BUILD_NUMBER
+                    sudo -S rm -rf /tmp/coop-repo_$BUILD_NUMBER
                 else
                     echo "/tmp/coop-repo_$BUILD_NUMBER not found moving on"
                 fi
@@ -36,7 +36,7 @@ def appendOutput(stageName) {
                 if [ -d "/tmp/Success_files_$BUILD_NUMBER" ] 
                 then
                     echo "Directory exists."
-                    rm -rf /tmp/Success_files_$BUILD_NUMBER
+                    sudo -S rm -rf /tmp/Success_files_$BUILD_NUMBER
                 else
                     echo "/tmp/Success_files_$BUILD_NUMBER not found moving on"
                 fi
@@ -223,6 +223,7 @@ pipeline {
                 sh '''
                 sudo -S rm -rf $WORKSPACE/$BUILD_NUMBER
                 sudo -S rm -rf $WORKSPACE/wrf_output.zip
+                sudo -S rm -rf /tmp/raw*
                 sudo terraform -v 
                 '''
             }
@@ -347,32 +348,32 @@ pipeline {
         stage('Checking commit to see type of file that was changed') {
             steps('.md/.txt/README.namelist/README.physics_files/README.rasm_diag/README.tslist/README') {
                 script {
-                echo "Checking commits to see if changes were made to .md/.txt/README.namelist/README.physics_files/README.rasm_diag/README.tslist/README Files and Running/Failing the test cases depending on action being open/synchronise/edited/review_requested/reopened"
-                echo "$BUILD_NUMBER"
-                echo "fork_repo_$BUILD_NUMBER"
-                echo "Pull number is: $pullnumber"
-                def sh9="""
-                curl -s https://patch-diff.githubusercontent.com/raw/scala-computing/WRF/pull/${pullnumber}.patch| grep -i "SUBJECT" | tail -n 1 | awk '{\$1="";\$2="";\$3=""; print \$0}'
-                """
-                env.prComment=mysh(sh9)
-                println("Checking for list of file changes in this commit")
-                def sh13="""
-                cd $WORKSPACE/$BUILD_NUMBER/forked_repo 
-                git diff-tree --no-commit-id --name-only -r $commitID
-                """
-                bool=filterFiles(sh13)
-                readme=filterReadme(sh13)
-                /*
-                Check for files with .md/.txt extension or README.namelist/README.physics_files/README.rasm_diag/README.tslist/README are in a pull request. 
-                It returns true if every file is .md/.txt or README.namelist/README.physics_files/README.rasm_diag/README.tslist/README are else it returns false.
-                */
-                println("################## Action ####################")
-                println(action)
-                println("##############################################")
+                    echo "Checking commits to see if changes were made to .md/.txt/README.namelist/README.physics_files/README.rasm_diag/README.tslist/README Files and Running/Failing the test cases depending on action being open/synchronise/edited/review_requested/reopened"
+                    echo "$BUILD_NUMBER"
+                    echo "fork_repo_$BUILD_NUMBER"
+                    echo "Pull number is: $pullnumber"
+                    def sh9="""
+                    curl -s https://patch-diff.githubusercontent.com/raw/scala-computing/WRF/pull/${pullnumber}.patch| grep -i "SUBJECT" | tail -n 1 | awk '{\$1="";\$2="";\$3=""; print \$0}'
+                    """
+                    env.prComment=mysh(sh9)
+                    println("Checking for list of file changes in this commit")
+                    def sh13="""
+                    cd $WORKSPACE/$BUILD_NUMBER/forked_repo 
+                    git diff-tree --no-commit-id --name-only -r $commitID
+                    """
+                    bool=filterFiles(sh13)
+                    readme=filterReadme(sh13)
+                    /*
+                    Check for files with .md/.txt extension or README.namelist/README.physics_files/README.rasm_diag/README.tslist/README are in a pull request. 
+                    It returns true if every file is .md/.txt or README.namelist/README.physics_files/README.rasm_diag/README.tslist/README are else it returns false.
+                    */
+                    println("################## Action ####################")
+                    println(action)
+                    println("##############################################")
 
-                // if(bool ==true || label=='"DO_NO_TEST"'|| label == '"Staging"'|| label != '"Feature"') { // Old if condition changed with enhancements
+                    // if(bool ==true || label=='"DO_NO_TEST"'|| label == '"Staging"'|| label != '"Feature"') { // Old if condition changed with enhancements
 
-                    if ( readme == true || bool ==true || label=='"DO_NO_TEST"'|| label == '"Staging"'||label =='"Previous-pipeline"'||label !='"New-Repo"' ) {
+                    if ( readme == true || bool ==true || label=='"DO_NO_TEST"'|| label == '"Staging"'||label =='"Previous-pipeline"' ||label =='"Davegill-repo"' ||label !='"New-Repo"' ) {
                         println("Entering if condition")
                         killall_jobs()
                         currentBuild.result = 'ABORTED'
