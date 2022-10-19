@@ -12,7 +12,7 @@ def appendOutput(stageName) {
                 if [ -d "/tmp/raw_output_$BUILD_NUMBER/" ] 
                 then
                     echo "Directory exists."
-                    rm -rf /tmp/raw_output_$BUILD_NUMBER/ 
+                    sudo -S rm -rf /tmp/raw_output_$BUILD_NUMBER/ 
                 else
                     echo "/tmp/raw_output_$BUILD_NUMBER/ not found moving on"
                 fi
@@ -20,7 +20,7 @@ def appendOutput(stageName) {
                 if [ -d "/tmp/raw_output_$BUILD_NUMBER/final_output" ] 
                 then
                     echo "Directory exists."
-                    rm -rf /tmp/raw_output_$BUILD_NUMBER/final_output
+                    sudo -S rm -rf /tmp/raw_output_$BUILD_NUMBER/final_output
                 else
                     echo "/tmp/raw_output_$BUILD_NUMBER/final_output not found moving on"
                 fi
@@ -28,7 +28,7 @@ def appendOutput(stageName) {
                 if [ -d "/tmp/coop-repo_$BUILD_NUMBER" ] 
                 then
                     echo "Directory exists."
-                    rm -rf /tmp/coop-repo_$BUILD_NUMBER
+                    sudo -S rm -rf /tmp/coop-repo_$BUILD_NUMBER
                 else
                     echo "/tmp/coop-repo_$BUILD_NUMBER not found moving on"
                 fi
@@ -36,7 +36,7 @@ def appendOutput(stageName) {
                 if [ -d "/tmp/Success_files_$BUILD_NUMBER" ] 
                 then
                     echo "Directory exists."
-                    rm -rf /tmp/Success_files_$BUILD_NUMBER
+                    sudo -S rm -rf /tmp/Success_files_$BUILD_NUMBER
                 else
                     echo "/tmp/Success_files_$BUILD_NUMBER not found moving on"
                 fi
