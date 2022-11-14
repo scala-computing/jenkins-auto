@@ -518,10 +518,11 @@ pipeline {
         aborted {
             withCredentials([string(credentialsId: 'vl-git-token', variable: 'gitToken')]) {
                 script{
-                    if  ( readme == true || bool == true ) {
-                        echo "Change was made to a text or README file"
-                    } else if ( readme == true || bool == true ) && ( action == '"labeled"' ||  action == '"unlabeled"' ) {
+                    // if  ( readme == true || bool == true && action == '"labeled"' ||  action == '"unlabeled"' ) {
+                    if (action == '"labeled"' ||  action == '"unlabeled"') {
                         echo "A label was changed"
+                    } else if ( readme == true || bool == true ) {
+                        echo "Change was made to a text or README file"
                     } else if ( currentBuild.result == 'ABORTED' ) {
                         echo "job timed out"
                     } 
