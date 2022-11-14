@@ -210,7 +210,7 @@ def filterFiles(cmd) {
 pipeline {
     agent any
     options {
-        timeout(time: 1, unit: 'HOURS')   // timeout on whole pipeline job
+        timeout(time: 1, unit: 'Minute')   // timeout on whole pipeline job
     }
     
     parameters {
@@ -386,22 +386,23 @@ pipeline {
                     */
                     } else if ( action == '"opened"' || action == '"synchronize"' || action == '"reopened"' ) {
                         println("Proceeding to another stage because commits have not been found in .md/.txt files and action is open/sycnhronize/reopened")
-                        // Running terraform deployment
-                        println("Deploying terraform:")
-                        terraformStage("Running Terraform").call()
-                        println("Terraform deployment finished. Now checking the status of test cases running/finished:")
+                        sh ''' #!/bin/bash sleep 10m '''
+                        // // Running terraform deployment
+                        // println("Deploying terraform:")
+                        // terraformStage("Running Terraform").call()
+                        // println("Terraform deployment finished. Now checking the status of test cases running/finished:")
                         
-                        // check test cases running status 
-                        checkinstancerunningStatus("Check Test cases running status").call()
-                        println("Test Cases finished running. Now downloading the output of test cases from S3 on to Jenkins server")
+                        // // check test cases running status 
+                        // checkinstancerunningStatus("Check Test cases running status").call()
+                        // println("Test Cases finished running. Now downloading the output of test cases from S3 on to Jenkins server")
                     
-                        // combines outputs and makes comparisons to evaluate pass/fail
-                        appendOutput("Backup appended output files to S3").call()
-                        println("The test cases have been appended and backed up to S3 output folder")
+                        // // combines outputs and makes comparisons to evaluate pass/fail
+                        // appendOutput("Backup appended output files to S3").call()
+                        // println("The test cases have been appended and backed up to S3 output folder")
 
-                        // Downloads output from S3 to Jenkins server
-                        downloadOutput("Download output of the current Test build").call()
-                        println("Test cases downloaded successfully. Now sending e-mail to the stakeholders. Now ready to send e-mail notification")
+                        // // Downloads output from S3 to Jenkins server
+                        // downloadOutput("Download output of the current Test build").call()
+                        // println("Test cases downloaded successfully. Now sending e-mail to the stakeholders. Now ready to send e-mail notification")
                     /*
                     Kill the job if neither of the above conditions are true 
                     */
@@ -525,26 +526,27 @@ pipeline {
                         echo "Change was made to a text or README file"
                     } else if ( currentBuild.result == 'ABORTED' ) {
                         echo "job timed out"
+                        
+                        echo "Job Aborted. Now sending e-mail notification and cleaning workspace"   
+
+                        sh """
+                        curl -s "https://api.GitHub.com/repos/scala-computing/WRF/statuses/$sha" \
+                        -H "Content-Type: application/json" \
+                        -H "Authorization: token $gitToken" \
+                        -X POST \
+                        -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test not required", "target_url": "https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
+                        echo "#############Job Aborted############"
+                        sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: $pullnumber has : Status: Aborted" "Jenkins build with, action $action commit id $commitID, branch name $fork_branchName by $githubuserName aborted because WRF regression test not required. https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"
+                         echo "Cleaning workspace"
+                        cd $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform && sudo terraform destroy -auto-approve || true
+                        sudo -S rm -rf $WORKSPACE/$BUILD_NUMBER
+                        sudo -S rm -rf /tmp/raw_output_$BUILD_NUMBER
+                        sudo -S rm -rf /tmp/coop-repo_$BUILD_NUMBER
+                        sudo -S rm -rf /tmp/Success_files_$BUILD_NUMBER
+                        """
+                        //,hstone@scalacomputing.com
                     } 
                 }
-                
-                // echo "Job Aborted. Now sending e-mail notification and cleaning workspace"   
-
-                // sh """
-                // curl -s "https://api.GitHub.com/repos/scala-computing/WRF/statuses/$sha" \
-                // -H "Content-Type: application/json" \
-                // -H "Authorization: token $gitToken" \
-                // -X POST \
-                // -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test not required", "target_url": "https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
-                // echo "#############Job Aborted############"
-                // sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com,hstone@scalacomputing.com" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: $pullnumber has : Status: Aborted" "Jenkins build with, action $action commit id $commitID, branch name $fork_branchName by $githubuserName aborted because WRF regression test not required. https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"
-                //  echo "Cleaning workspace"
-                // cd $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform && sudo terraform destroy -auto-approve || true
-                // sudo -S rm -rf $WORKSPACE/$BUILD_NUMBER
-                // sudo -S rm -rf /tmp/raw_output_$BUILD_NUMBER
-                // sudo -S rm -rf /tmp/coop-repo_$BUILD_NUMBER
-                // sudo -S rm -rf /tmp/Success_files_$BUILD_NUMBER
-                // """
             } 
         }
     }
