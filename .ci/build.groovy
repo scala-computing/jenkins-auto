@@ -520,7 +520,7 @@ pipeline {
                 script{
                     if  ( readme == true || bool == true ) {
                         echo "Change was made to a text or README file"
-                    } else if (readme == true || bool == true && action == '"labeled"' ||  action == '"unlabeled"') {
+                    } else if ( action == '"labeled"' ||  action == '"unlabeled"' ) {
                         echo "A label was changed"
                     } else if ( currentBuild.result == 'ABORTED' ) {
                         echo "job timed out"
