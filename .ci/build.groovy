@@ -210,7 +210,7 @@ def filterFiles(cmd) {
 pipeline {
     agent any
     options {
-        timeout(time: 1, unit: 'Minute')   // timeout on whole pipeline job
+        timeout(time: 1, unit: 'MINUTES')   // timeout on whole pipeline job
     }
     
     parameters {
@@ -526,7 +526,7 @@ pipeline {
                         echo "Change was made to a text or README file"
                     } else if ( currentBuild.result == 'ABORTED' ) {
                         echo "job timed out"
-                        
+
                         echo "Job Aborted. Now sending e-mail notification and cleaning workspace"   
 
                         sh """
