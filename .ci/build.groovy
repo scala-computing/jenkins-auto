@@ -517,7 +517,7 @@ pipeline {
                     echo "Change was made to a text or README file"
                 } else if ( "$action" == '"labeled"' ||  "$action" == '"unlabeled"') {
                     echo "A label was added"
-                } else if (currentBuild.result = 'ABORTED') {
+                } else if (currentBuild.result == 'ABORTED') {
                     echo "job timed out"
                 }
                 echo "Job Aborted. Now sending e-mail notification and cleaning workspace"   
