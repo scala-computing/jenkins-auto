@@ -242,22 +242,26 @@ pipeline {
                         def sh18= """
                         cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq '.pull_request.base.user.login'
                         """
-                        env.baseowner=mysh(sh18)
+                        baseowner=mysh(sh18)
+                        println(baseowner)
                         // pull request number
                         def sh17= """
                         cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq .number
                         """
-                        env.pullnumber=mysh(sh17)
+                        pullnumber=mysh(sh17)
+                        println(pullnumber)
                         // action variable
                         def sh16= """
                         cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq .action
                         """
-                        env.action=mysh(sh16)
+                        action=mysh(sh16)
+                        println(action)
                         // SHA ID
                         def sh14= """
                         cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq .pull_request.head.sha
                         """
-                        env.sha=mysh(sh14)
+                        sha=mysh(sh14)
+                        println(sha)
                     
                         // Github status for current build
                         sh """
@@ -516,13 +520,11 @@ pipeline {
                 script{
                     if  ( readme == true || bool == true ) {
                         echo "Change was made to a text or README file"
-                    } else if ( "$action" == '"labeled"' ||  "$action" == '"unlabeled"') {
-                        echo "A label was added"
+                    } else if ( action == '"labeled"' ||  action == '"unlabeled"') {
+                        echo "A label was changed"
                     } else if ( currentBuild.result == 'ABORTED' ) {
                         echo "job timed out"
-                    } else {
-                        echo "Job Aborted. Now sending e-mail notification and cleaning workspace" 
-                    }
+                    } 
                 }
                 
                 // echo "Job Aborted. Now sending e-mail notification and cleaning workspace"   
