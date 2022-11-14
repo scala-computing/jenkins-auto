@@ -373,7 +373,7 @@ pipeline {
 
                     // if(bool ==true || label=='"DO_NO_TEST"'|| label == '"Staging"'|| label != '"Feature"') { // Old if condition changed with enhancements
 
-                    if ( readme == true || bool ==true || label=='"DO_NO_TEST"'|| label == '"Staging"'||label =='"Previous-pipeline"' ||label =='"Davegill-repo"' ||label !='"New-Repo"' ) {
+                    if ( readme == true || bool == true || label == '"DO_NO_TEST"'|| label == '"Staging"'||label == '"Previous-pipeline"' ||label == '"Davegill-repo"' ||label != '"New-Repo"' ) {
                         println("Entering if condition")
                         killall_jobs()
                         currentBuild.result = 'ABORTED'
@@ -513,14 +513,16 @@ pipeline {
 
         aborted {
             withCredentials([string(credentialsId: 'vl-git-token', variable: 'gitToken')]) {
-                if  ( readme == true || bool ==true ) {
+                if  ( readme == true || bool == true ) {
                     echo "Change was made to a text or README file"
                 } else if ( "$action" == '"labeled"' ||  "$action" == '"unlabeled"') {
                     echo "A label was added"
-                } else if (currentBuild.result == 'ABORTED') {
+                } else if ( currentBuild.result == 'ABORTED' ) {
                     echo "job timed out"
+                } else {
+                    echo "Job Aborted. Now sending e-mail notification and cleaning workspace" 
                 }
-                echo "Job Aborted. Now sending e-mail notification and cleaning workspace"   
+                // echo "Job Aborted. Now sending e-mail notification and cleaning workspace"   
 
                 // sh """
                 // curl -s "https://api.GitHub.com/repos/scala-computing/WRF/statuses/$sha" \
