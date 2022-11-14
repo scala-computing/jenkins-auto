@@ -242,22 +242,26 @@ pipeline {
                         def sh18= """
                         cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq '.pull_request.base.user.login'
                         """
-                        env.baseowner=mysh(sh18)
+                        baseowner=mysh(sh18)
+                        println(baseowner)
                         // pull request number
                         def sh17= """
                         cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq .number
                         """
-                        env.pullnumber=mysh(sh17)
+                        pullnumber=mysh(sh17)
+                        println(pullnumber)
                         // action variable
                         def sh16= """
                         cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq .action
                         """
-                        env.action=mysh(sh16)
+                        action=mysh(sh16)
+                        println(action)
                         // SHA ID
                         def sh14= """
                         cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq .pull_request.head.sha
                         """
-                        env.sha=mysh(sh14)
+                        sha=mysh(sh14)
+                        println(sha)
                     
                         // Github status for current build
                         sh """
@@ -373,7 +377,7 @@ pipeline {
 
                     // if(bool ==true || label=='"DO_NO_TEST"'|| label == '"Staging"'|| label != '"Feature"') { // Old if condition changed with enhancements
 
-                    if ( readme == true || bool ==true || label=='"DO_NO_TEST"'|| label == '"Staging"'||label =='"Previous-pipeline"' ||label =='"Davegill-repo"' ||label !='"New-Repo"' ) {
+                    if ( readme == true || bool == true || label =='"DO_NO_TEST"'|| label == '"Staging"'|| label =='"Previous-pipeline"' || label =='"Davegill-repo"' || label !='"New-Repo"' ) {
                         println("Entering if condition")
                         killall_jobs()
                         currentBuild.result = 'ABORTED'
@@ -513,24 +517,35 @@ pipeline {
 
         aborted {
             withCredentials([string(credentialsId: 'git-token', variable: 'gitToken')]) {
-                echo "Job Aborted. Now sending e-mail notification and cleaning workspace"   
+                script{
+                    // if  ( readme == true || bool == true && action == '"labeled"' ||  action == '"unlabeled"' ) {
+                    if (action == '"labeled"' ||  action == '"unlabeled"') {
+                        echo "A label was changed"
+                    } else if ( readme == true || bool == true ) {
+                        echo "Change was made to a text or README file"
+                    } else {
+                        echo "job timed out"
 
-                sh """
-                curl -s "https://api.GitHub.com/repos/wrf-model/WRF/statuses/$sha" \
-                -H "Content-Type: application/json" \
-                -H "Authorization: token $gitToken" \
-                -X POST \
-                -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test not required", "target_url": "https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
-                echo "#############Job Aborted############"
-                sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com,kkeene@ucar.edu,weiwang@ucar.edu" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: $pullnumber has : Status: Aborted" "Jenkins build with commit id $commitID, branch name $fork_branchName by $githubuserName aborted because WRF regression test not required. https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"
-                echo "Cleaning workspace"
-                cd $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform && sudo terraform destroy -auto-approve || true
-                sudo -S rm -rf $WORKSPACE/$BUILD_NUMBER
-                sudo -S rm -rf /tmp/raw_output_$BUILD_NUMBER
-                sudo -S rm -rf /tmp/coop-repo_$BUILD_NUMBER
-                sudo -S rm -rf /tmp/Success_files_$BUILD_NUMBER
-                """
-            }  
+                        echo "Job Aborted. Now sending e-mail notification and cleaning workspace"   
+
+                        sh """
+                        curl -s "https://api.GitHub.com/repos/scala-computing/WRF/statuses/$sha" \
+                        -H "Content-Type: application/json" \
+                        -H "Authorization: token $gitToken" \
+                        -X POST \
+                        -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test not required", "target_url": "https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
+                        echo "#############Job Aborted############"
+                        sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com,hstone@scalacomputing.com" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: $pullnumber has : Status: Aborted" "Jenkins build triggered by action: $action with, commit id $commitID, branch name $fork_branchName by $githubuserName aborted because WRF regression test not required. https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"
+                         echo "Cleaning workspace"
+                        cd $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform && sudo terraform destroy -auto-approve || true
+                        sudo -S rm -rf $WORKSPACE/$BUILD_NUMBER
+                        sudo -S rm -rf /tmp/raw_output_$BUILD_NUMBER
+                        sudo -S rm -rf /tmp/coop-repo_$BUILD_NUMBER
+                        sudo -S rm -rf /tmp/Success_files_$BUILD_NUMBER
+                        """
+                    }
+                }  
+            }
         }
     }
 }
