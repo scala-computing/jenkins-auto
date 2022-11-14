@@ -513,19 +513,18 @@ pipeline {
 
         aborted {
             withCredentials([string(credentialsId: 'vl-git-token', variable: 'gitToken')]) {
-                steps{
-                    script{
-                        if  ( readme == true || bool == true ) {
-                            echo "Change was made to a text or README file"
-                        } else if ( "$action" == '"labeled"' ||  "$action" == '"unlabeled"') {
-                            echo "A label was added"
-                        } else if ( currentBuild.result == 'ABORTED' ) {
-                            echo "job timed out"
-                        } else {
-                            echo "Job Aborted. Now sending e-mail notification and cleaning workspace" 
-                        }
+                script{
+                    if  ( readme == true || bool == true ) {
+                        echo "Change was made to a text or README file"
+                    } else if ( "$action" == '"labeled"' ||  "$action" == '"unlabeled"') {
+                        echo "A label was added"
+                    } else if ( currentBuild.result == 'ABORTED' ) {
+                        echo "job timed out"
+                    } else {
+                        echo "Job Aborted. Now sending e-mail notification and cleaning workspace" 
                     }
                 }
+                
                 // echo "Job Aborted. Now sending e-mail notification and cleaning workspace"   
 
                 // sh """
