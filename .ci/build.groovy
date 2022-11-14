@@ -513,24 +513,31 @@ pipeline {
 
         aborted {
             withCredentials([string(credentialsId: 'vl-git-token', variable: 'gitToken')]) {
+                if  ( readme == true || bool ==true ) {
+                    echo "Change was made to a text or README file"
+                } else if ( action = '"labeled"') {
+                    echo "A label was added"
+                } else if (currentBuild.result = 'ABORTED') {
+                    echo "job timed out"
+                }
                 echo "Job Aborted. Now sending e-mail notification and cleaning workspace"   
 
-                sh """
-                curl -s "https://api.GitHub.com/repos/scala-computing/WRF/statuses/$sha" \
-                -H "Content-Type: application/json" \
-                -H "Authorization: token $gitToken" \
-                -X POST \
-                -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test not required", "target_url": "https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
-                echo "#############Job Aborted############"
-                sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com,hstone@scalacomputing.com" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: $pullnumber has : Status: Aborted" "Jenkins build with commit id $commitID, branch name $fork_branchName by $githubuserName aborted because WRF regression test not required. https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"
-                echo "Cleaning workspace"
-                cd $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform && sudo terraform destroy -auto-approve || true
-                sudo -S rm -rf $WORKSPACE/$BUILD_NUMBER
-                sudo -S rm -rf /tmp/raw_output_$BUILD_NUMBER
-                sudo -S rm -rf /tmp/coop-repo_$BUILD_NUMBER
-                sudo -S rm -rf /tmp/Success_files_$BUILD_NUMBER
-                """
-            }  
+                // sh """
+                // curl -s "https://api.GitHub.com/repos/scala-computing/WRF/statuses/$sha" \
+                // -H "Content-Type: application/json" \
+                // -H "Authorization: token $gitToken" \
+                // -X POST \
+                // -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test not required", "target_url": "https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
+                // echo "#############Job Aborted############"
+                // sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com,hstone@scalacomputing.com" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: $pullnumber has : Status: Aborted" "Jenkins build with, action $action commit id $commitID, branch name $fork_branchName by $githubuserName aborted because WRF regression test not required. https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"
+                //  echo "Cleaning workspace"
+                // cd $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform && sudo terraform destroy -auto-approve || true
+                // sudo -S rm -rf $WORKSPACE/$BUILD_NUMBER
+                // sudo -S rm -rf /tmp/raw_output_$BUILD_NUMBER
+                // sudo -S rm -rf /tmp/coop-repo_$BUILD_NUMBER
+                // sudo -S rm -rf /tmp/Success_files_$BUILD_NUMBER
+                // """
+            } 
         }
     }
 }
