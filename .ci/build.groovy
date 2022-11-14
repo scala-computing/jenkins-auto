@@ -377,7 +377,7 @@ pipeline {
 
                     // if(bool ==true || label=='"DO_NO_TEST"'|| label == '"Staging"'|| label != '"Feature"') { // Old if condition changed with enhancements
 
-                    if ( readme == true || bool == true || label == '"DO_NO_TEST"'|| label == '"Staging"'||label == '"Previous-pipeline"' ||label == '"Davegill-repo"' ||label != '"New-Repo"' ) {
+                    if ( readme == true || bool == true || label == '"DO_NO_TEST"'|| label == '"Staging"'|| label == '"Previous-pipeline"' || label == '"Davegill-repo"' || label != '"New-Repo"' ) {
                         println("Entering if condition")
                         killall_jobs()
                         currentBuild.result = 'ABORTED'
@@ -520,7 +520,7 @@ pipeline {
                 script{
                     if  ( readme == true || bool == true ) {
                         echo "Change was made to a text or README file"
-                    } else if ( action == '"labeled"' ||  action == '"unlabeled"') {
+                    } else if (readme == true || bool == true && action == '"labeled"' ||  action == '"unlabeled"') {
                         echo "A label was changed"
                     } else if ( currentBuild.result == 'ABORTED' ) {
                         echo "job timed out"
