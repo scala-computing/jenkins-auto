@@ -377,7 +377,7 @@ pipeline {
 
                     // if(bool ==true || label=='"DO_NO_TEST"'|| label == '"Staging"'|| label != '"Feature"') { // Old if condition changed with enhancements
 
-                    if ( readme == true || bool == true || label == '"DO_NO_TEST"'|| label == '"Staging"'|| label == '"Previous-pipeline"' || label == '"Davegill-repo"' || label != '"New-Repo"' ) {
+                    if ( readme == true || bool == true || label == '"DO_NO_TEST"'|| label == '"Staging"'|| label == '"Previous-pipeline"' || label == '"Davegill-repo"'  ) { // || label != '"New-Repo"'
                         println("Entering if condition")
                         killall_jobs()
                         currentBuild.result = 'ABORTED'
