@@ -180,7 +180,7 @@ def killall_jobs() {
     """
     rm=sh(script: rmi,returnStdout: true)
     def job = Jenkins.instance.getItemByFullName(jobname)
-    println("Kill task because commits have been found in .md and .txt files for buildNumber or either action is other than open/synchronise")
+    println("Kill task because commits have been found in .md and .txt files for $BUILD_NUMBER or either action is other than open/synchronise")
 }
 
 //Run any shell script with this function
