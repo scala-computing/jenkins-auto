@@ -242,27 +242,42 @@ pipeline {
                         def sh18= """
                         cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq '.pull_request.base.user.login'
                         """
-                        baseowner=mysh(sh18)
-                        println(baseowner)
+                        // baseowner=mysh(sh18)
+                        // println(baseowner)
+                        // // pull request number
+                        // def sh17= """
+                        // cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq .number
+                        // """
+                        // pullnumber=mysh(sh17)
+                        // println(pullnumber)
+                        // // action variable
+                        // def sh16= """
+                        // cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq .action
+                        // """
+                        // action=mysh(sh16)
+                        // println(action)
+                        // // SHA ID
+                        // def sh14= """
+                        // cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq .pull_request.head.sha
+                        // """
+                        // sha=mysh(sh14)
+                        // println(sha)
+                        env.baseowner=mysh(sh18)
                         // pull request number
                         def sh17= """
                         cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq .number
                         """
-                        pullnumber=mysh(sh17)
-                        println(pullnumber)
+                        env.pullnumber=mysh(sh17)
                         // action variable
                         def sh16= """
                         cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq .action
                         """
-                        action=mysh(sh16)
-                        println(action)
+                        env.action=mysh(sh16)
                         // SHA ID
                         def sh14= """
                         cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq .pull_request.head.sha
                         """
-                        sha=mysh(sh14)
-                        println(sha)
-                    
+                        env.sha=mysh(sh14)
                         // Github status for current build
                         sh """
                         curl -s "https://api.GitHub.com/repos/scala-computing/WRF/statuses/$sha" \
