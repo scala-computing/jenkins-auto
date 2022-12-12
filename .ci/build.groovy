@@ -119,7 +119,7 @@ def terraformStage(stageName) {
             sudo -S chmod 777 -R $WORKSPACE/$BUILD_NUMBER 
             sudo -S mkdir -p $WORKSPACE/$BUILD_NUMBER/WRF 
             echo "Cloning repo into:   $WORKSPACE/$BUILD_NUMBER/WRF "
-            sudo -S git clone --single-branch --branch production https://github.com/scala-computing/jenkins-auto.git $WORKSPACE/$BUILD_NUMBER/WRF
+            sudo -S git clone --single-branch --branch master https://github.com/scala-computing/jenkins-auto.git $WORKSPACE/$BUILD_NUMBER/WRF
             sudo -S sed -i 's/default = "wrf-test"/default = "wrf-test-${BUILD_NUMBER}"/' $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform/vars.tf
             """        
             if (label=='"DO_KPP_TEST"') {        
@@ -176,11 +176,11 @@ def killall_jobs() {
     def rmi = """
     sudo -S mkdir -p $WORKSPACE/$BUILD_NUMBER/WRF
     echo "Cloning repo into:   $WORKSPACE/$BUILD_NUMBER/WRF "
-    sudo -S git clone --single-branch --branch production https://github.com/scala-computing/jenkins-auto.git $WORKSPACE/$BUILD_NUMBER/WRF   
+    sudo -S git clone --single-branch --branch master https://github.com/scala-computing/jenkins-auto.git $WORKSPACE/$BUILD_NUMBER/WRF   
     """
     rm=sh(script: rmi,returnStdout: true)
     def job = Jenkins.instance.getItemByFullName(jobname)
-    println("Kill task because commits have been found in .md and .txt files for buildNumber or either action is other than open/synchronise")
+    println("Kill task because commits have been found in .md and .txt files for $BUILD_NUMBER or either action is other than open/synchronise")
 }
 
 //Run any shell script with this function
@@ -242,27 +242,22 @@ pipeline {
                         def sh18= """
                         cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq '.pull_request.base.user.login'
                         """
-                        baseowner=mysh(sh18)
-                        println(baseowner)
+                        env.baseowner=mysh(sh18)
                         // pull request number
                         def sh17= """
                         cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq .number
                         """
-                        pullnumber=mysh(sh17)
-                        println(pullnumber)
+                        env.pullnumber=mysh(sh17)
                         // action variable
                         def sh16= """
                         cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq .action
                         """
-                        action=mysh(sh16)
-                        println(action)
+                        env.action=mysh(sh16)
                         // SHA ID
                         def sh14= """
                         cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq .pull_request.head.sha
                         """
-                        sha=mysh(sh14)
-                        println(sha)
-                    
+                        env.sha=mysh(sh14)
                         // Github status for current build
                         sh """
                         curl -s "https://api.GitHub.com/repos/wrf-model/WRF/statuses/$sha" \
