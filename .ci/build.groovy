@@ -8,7 +8,6 @@ def appendOutput(stageName) {
             dir(dirpath) {
                 sh """
                 echo $dirpath
-
                 if [ -d "/tmp/raw_output_$BUILD_NUMBER/" ] 
                 then
                     echo "Directory exists."
@@ -16,7 +15,6 @@ def appendOutput(stageName) {
                 else
                     echo "/tmp/raw_output_$BUILD_NUMBER/ not found moving on"
                 fi
-
                 if [ -d "/tmp/raw_output_$BUILD_NUMBER/final_output" ] 
                 then
                     echo "Directory exists."
@@ -24,7 +22,6 @@ def appendOutput(stageName) {
                 else
                     echo "/tmp/raw_output_$BUILD_NUMBER/final_output not found moving on"
                 fi
-
                 if [ -d "/tmp/coop-repo_$BUILD_NUMBER" ] 
                 then
                     echo "Directory exists."
@@ -32,7 +29,6 @@ def appendOutput(stageName) {
                 else
                     echo "/tmp/coop-repo_$BUILD_NUMBER not found moving on"
                 fi
-
                 if [ -d "/tmp/Success_files_$BUILD_NUMBER" ] 
                 then
                     echo "Directory exists."
@@ -40,31 +36,26 @@ def appendOutput(stageName) {
                 else
                     echo "/tmp/Success_files_$BUILD_NUMBER not found moving on"
                 fi
-
                 sudo -S mkdir -p /tmp/raw_output_$BUILD_NUMBER/
                 sudo -S mkdir -p /tmp/raw_output_$BUILD_NUMBER/final_output
                 sudo -S mkdir -p /tmp/coop-repo_$BUILD_NUMBER
                 sudo -S mkdir -p /tmp/Success_files_$BUILD_NUMBER
-
                 sudo -S aws s3 cp s3://wrf-testcase/raw_output/$BUILD_NUMBER/ /tmp/raw_output_$BUILD_NUMBER/ --region us-east-1 --recursive
                 sudo -S git clone --branch regression+feature https://github.com/wrf-model/wrf-coop.git /tmp/coop-repo_$BUILD_NUMBER/wrf-coop
                 csh /tmp/coop-repo_$BUILD_NUMBER/wrf-coop/build.csh /tmp/coop-repo_$BUILD_NUMBER/wrf-coop /tmp/coop-repo_$BUILD_NUMBER/wrf-coop
                 sh $WORKSPACE/$BUILD_NUMBER/terraform/part.sh
                 """
                 //OK=$(diff -q $file1 $file2) && echo "$fileone vs $file2 status = $OK"
-
                 
                 // sh"""
                 // sudo -S aws s3 cp /tmp/raw_output_$BUILD_NUMBER/final_output/ s3://wrf-testcase/cost_optimized_output/$BUILD_NUMBER/ --region us-east-1 --recursive
                 // """
-
-           }
+            }
         }
     }
 }                
                 // sudo -S rm -rf /tmp/raw_output_$BUILD_NUMBER
                 // sudo -S aws s3 cp s3://wrf-testcase/output/$BUILD_NUMBER/ output_testcase/ --region us-east-1 --recursive
-
 //Download output of test cases
 def downloadOutput(stageName) {
     return{
@@ -107,7 +98,6 @@ def checkinstancerunningStatus(stageName) {
         }
     }
 }
-    
 def terraformStage(stageName) {
     return {
         stage("${stageName}") {
@@ -146,7 +136,6 @@ def terraformStage(stageName) {
         }
     }
 }
-
 /***
 Func to check if instane with current tag is running or not
 ***/
@@ -163,7 +152,6 @@ def Instanceflag() {
     }
     return running
 }
-
 /***
     Kill current build for this JOB
 ***/
@@ -182,12 +170,10 @@ def killall_jobs() {
     def job = Jenkins.instance.getItemByFullName(jobname)
     println("Kill task because commits have been found in .md and .txt files for $BUILD_NUMBER or either action is other than open/synchronise")
 }
-
 //Run any shell script with this function
 def mysh(cmd) {
     return sh(script: cmd, returnStdout: true).trim()
 }
-
 // Func to return boolean true if in PR we have only .md/.txt files and False in case of anything else
 def filterReadme(cmd) {
     def readmelist=[]
@@ -197,7 +183,6 @@ def filterReadme(cmd) {
     def readme=readmelist.every {it =~ /^.*\b(README.namelist|README.physics_files|README.rasm_diag|README.tslist|README)\b.*$/}
     return readme 
 }
-
 def filterFiles(cmd) {
     def list=[]
     list.add(sh(script: cmd, returnStdout: true).trim())    
@@ -206,7 +191,6 @@ def filterFiles(cmd) {
     def bool=list.every { it =~ /(?i)\.(?:md|txt)$/ }
     return bool 
 }
-
 pipeline {
     agent any
     options {
@@ -216,7 +200,6 @@ pipeline {
     parameters {
         string(name: 'payload', defaultValue: '', description: 'github payload')
     }
-  
     stages {
         stage('Clean Workspace') {
             steps ("Cleaning workspace") {
@@ -228,7 +211,6 @@ pipeline {
                 '''
             }
         }
-
         stage('Setting Variables From Webhook Payload') {
             steps ("Setting variables") {
                 withCredentials([string(credentialsId: 'git-token', variable: 'gitToken')]) {
@@ -343,7 +325,6 @@ pipeline {
                 }
             }
         }
-
         stage('Checking commit to see type of file that was changed') {
             steps('.md/.txt/README.namelist/README.physics_files/README.rasm_diag/README.tslist/README') {
                 script {
@@ -369,9 +350,7 @@ pipeline {
                     println("################## Action ####################")
                     println(action)
                     println("##############################################")
-
                     // if(bool ==true || label=='"DO_NO_TEST"'|| label == '"Staging"'|| label != '"Feature"') { // Old if condition changed with enhancements
-
                     if ( readme == true || bool == true || label =='"DO_NO_TEST"'|| label == '"Staging"'|| label =='"Previous-pipeline"' || label =='"Davegill-repo"'  ) { // || label !='"New-Repo"'
                         println("Entering if condition")
                         killall_jobs()
@@ -389,11 +368,9 @@ pipeline {
                         // check test cases running status 
                         checkinstancerunningStatus("Check Test cases running status").call()
                         println("Test Cases finished running. Now downloading the output of test cases from S3 on to Jenkins server")
-                    
                         // combines outputs and makes comparisons to evaluate pass/fail
                         appendOutput("Backup appended output files to S3").call()
                         println("The test cases have been appended and backed up to S3 output folder")
-
                         // Downloads output from S3 to Jenkins server
                         downloadOutput("Download output of the current Test build").call()
                         println("Test cases downloaded successfully. Now sending e-mail to the stakeholders. Now ready to send e-mail notification")
@@ -443,7 +420,6 @@ pipeline {
                         env.L=mysh("""cd $WORKSPACE/$BUILD_NUMBER/terraform/output_testcase && grep -a "status = " output_* | grep -av "status = 0" || true """) 
                         // if J is not 0, then include this text
                     }
-
                     if ("""$eMailID""") { 
                         /*
                         Pass and failure contxt for Github: If I and J are both zero ? Pass else Failed
@@ -488,7 +464,6 @@ pipeline {
                 }
             }
         }
-
         failure {
             withCredentials([string(credentialsId: 'git-token', variable: 'gitToken')]) {
             echo "Job failed. Now sending e-mail notification and cleaning workspace"
@@ -520,18 +495,16 @@ pipeline {
                         echo "Change was made to a text or README file"
                     } else {
                         echo "job timed out"
-
                         echo "Job Aborted. Now sending e-mail notification and cleaning workspace"   
-
                         sh """
                         curl -s "https://api.GitHub.com/repos/scala-computing/WRF/statuses/$sha" \
                         -H "Content-Type: application/json" \
                         -H "Authorization: token $gitToken" \
                         -X POST \
-                        -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test not required", "target_url": "https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
+                        -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test not required", "target_url": "https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
                         echo "#############Job Aborted############"
                         sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com,hstone@scalacomputing.com" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: $pullnumber has : Status: Aborted" "Jenkins build triggered by action: $action with, commit id $commitID, branch name $fork_branchName by $githubuserName aborted because WRF regression test not required. https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"
-                         echo "Cleaning workspace"
+                        echo "Cleaning workspace"
                         cd $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform && sudo terraform destroy -auto-approve || true
                         sudo -S rm -rf $WORKSPACE/$BUILD_NUMBER
                         sudo -S rm -rf /tmp/raw_output_$BUILD_NUMBER
