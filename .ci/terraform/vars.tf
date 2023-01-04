@@ -24,11 +24,9 @@ variable "instance_count" {default =58 }
 variable "instance_name"               { default = "wrf-test" }
 variable "instance_profile"            { default = "WRFS3Role" }
 
-variable "ami"                         { default = "ami-06142a4963294e771" } # kkeene44/wrf-coop:version16 v2
-# variable "ami"                         { default = "ami-09d38f399d44e4326" } # kkeene44/wrf-coop:version16
+variable "ami"                         { default = "ami-0154b272f9ffc30a1" } # adding upload_script.sh
+# variable "ami"                         { default = "ami-06142a4963294e771" } # kkeene44/wrf-coop:version16 v2
 # variable "ami"                         { default = "ami-0cd4a8daf73c05400" }  #fifteenthtry & fourteenthtry
-# variable "ami"                         { default = "ami-023f6d664346f3e84" }  #fourteenthtry
-# variable "ami"                         { default = "ami-06e599aaf4015dafd" }  #thirteenthtry & sixthtry
 variable "availability_zone"           { default = ""   }
 variable "ebs_optimized"               { default = false  }
 variable "instance_type_1"             { default = "c5.4xlarge" } 
