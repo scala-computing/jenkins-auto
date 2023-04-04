@@ -209,6 +209,8 @@ def filterFiles(cmd) {
 
 def reTest(stageName) {
     sh """
+        cd $WORKSPACE/$BUILD_NUMBER/forked_repo 
+        git status 
         git commit --allow-empty -m "ReTest-Commit"
         git push origin $fork_branchName
     """
