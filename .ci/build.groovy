@@ -385,6 +385,12 @@ pipeline {
                     /*
                     Check for action is open/sycnhronise and continue the build job
                     */
+                    } else if ( label ==  '"retest"' ) {
+                        reTest("Re-running tests").call()
+                        println("Detected re-test label, adding an empty comment to trigger a test.")
+                        /*
+                        Kill the job if neither of the above conditions are true 
+                        */
                     } else if ( action == '"opened"' || action == '"synchronize"' || action == '"reopened"' ) {
                         println("Proceeding to another stage because commits have not been found in .md/.txt files and action is open/sycnhronize/reopened")
                         // Running terraform deployment
@@ -403,12 +409,6 @@ pipeline {
                         // Downloads output from S3 to Jenkins server
                         downloadOutput("Download output of the current Test build").call()
                         println("Test cases downloaded successfully. Now sending e-mail to the stakeholders. Now ready to send e-mail notification")
-                    } else if ( action == '"retest"' ) {
-                        reTest("Re-running tests").call()
-                        println("Detected retest label, adding an empty comment to trigger a test.")
-                        /*
-                        Kill the job if neither of the above conditions are true 
-                        */
                     } else {
                         println("Entering else condition because neither commits have been found in .md/.txt/README.namelist/README.physics_files/README.rasm_diag/README.tslist/README files and action is not equal to open/synchronise/edited")
                         killall_jobs()
