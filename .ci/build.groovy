@@ -207,7 +207,7 @@ def filterFiles(cmd) {
     return bool 
 }
 
-def reTest() {
+def reTest(stageName) {
     sh """
         git commit --allow-empty -m "ReTest-Commit"
         git push origin $fork_branchName
@@ -540,7 +540,7 @@ pipeline {
                         -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test not required", "target_url": "https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
                         echo "#############Job Aborted############"
                         sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com,hstone@scalacomputing.com" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: $pullnumber has : Status: Aborted" "Jenkins build triggered by action: $action with, commit id $commitID, branch name $fork_branchName by $githubuserName aborted because WRF regression test not required. https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"
-                         echo "Cleaning workspace"
+                        echo "Cleaning workspace"
                         cd $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform && sudo terraform destroy -auto-approve || true
                         sudo -S rm -rf $WORKSPACE/$BUILD_NUMBER
                         sudo -S rm -rf /tmp/raw_output_$BUILD_NUMBER
