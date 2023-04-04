@@ -207,6 +207,12 @@ def filterFiles(cmd) {
     return bool 
 }
 
+def reTest() {
+    sh """
+        git commit --allow-empty -m "ReTest-Commit"
+        git push origin $fork_branchName
+    """
+}
 pipeline {
     agent any
     options {
@@ -216,7 +222,7 @@ pipeline {
     parameters {
         string(name: 'payload', defaultValue: '', description: 'github payload')
     }
-  
+
     stages {
         stage('Clean Workspace') {
             steps ("Cleaning workspace") {
@@ -389,7 +395,7 @@ pipeline {
                         // check test cases running status 
                         checkinstancerunningStatus("Check Test cases running status").call()
                         println("Test Cases finished running. Now downloading the output of test cases from S3 on to Jenkins server")
-                    
+
                         // combines outputs and makes comparisons to evaluate pass/fail
                         appendOutput("Backup appended output files to S3").call()
                         println("The test cases have been appended and backed up to S3 output folder")
@@ -397,9 +403,12 @@ pipeline {
                         // Downloads output from S3 to Jenkins server
                         downloadOutput("Download output of the current Test build").call()
                         println("Test cases downloaded successfully. Now sending e-mail to the stakeholders. Now ready to send e-mail notification")
-                    /*
-                    Kill the job if neither of the above conditions are true 
-                    */
+                    } else if ( action == '"retest"' ) {
+                        reTest("Re-running tests").call()
+                        println("Detected retest label, adding an empty comment to trigger a test.")
+                        /*
+                        Kill the job if neither of the above conditions are true 
+                        */
                     } else {
                         println("Entering else condition because neither commits have been found in .md/.txt/README.namelist/README.physics_files/README.rasm_diag/README.tslist/README files and action is not equal to open/synchronise/edited")
                         killall_jobs()
