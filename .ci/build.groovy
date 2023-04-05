@@ -208,15 +208,14 @@ def filterFiles(cmd) {
 }
 
 def reTest(stageName) {
-    withCredentials([sshUserPrivateKey(credentialsId: "jenkins-git-ssh-key", keyFileVariable: 'key')]) {
-        //auth to git here then do some commands for example:
-        sh """        
-        cd $WORKSPACE/$BUILD_NUMBER/forked_repo 
-        git status 
-        sudo -S git commit --allow-empty -m "ReTest-Commit"
-        GIT_SSH_COMMAND = "ssh -i $key"
-        sudo -S git push git@github.com:vlakshmanan/$repo_url $fork_branchName
-        """
+
+    withCredentials([usernamePassword(credentialsId: 'git-login',
+                usernameVariable: 'username',
+                passwordVariable: 'password')]){
+    sh("cd $WORKSPACE/$BUILD_NUMBER/forked_repo") 
+    sh("git status") 
+    sh('sudo -S git commit --allow-empty -m "rerunning the process"')
+    sh("git push http://$username:$password@github.com/scala-computing/WRF.git")
     }
 }
 
