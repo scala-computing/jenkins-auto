@@ -208,12 +208,14 @@ def filterFiles(cmd) {
 }
 
 def reTest(stageName) {
+    withCredentials([string(credentialsId: 'vl-git-token', variable: 'gitToken')]) {
     sh """
         cd $WORKSPACE/$BUILD_NUMBER/forked_repo 
         git status 
         sudo -S git commit --allow-empty -m "ReTest-Commit"
         sudo -S git push origin $fork_branchName
     """
+    }
 }
 pipeline {
     agent any
@@ -316,6 +318,7 @@ pipeline {
                         """
                         env.repo_url=mysh(sh7)
                         println(repo_url) // Github url
+
                         def sh11= """
                         cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq '.pull_request.user.login'
                         """
