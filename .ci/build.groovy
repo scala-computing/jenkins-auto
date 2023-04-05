@@ -208,16 +208,18 @@ def filterFiles(cmd) {
 }
 
 def reTest(stageName) {
-    withCredentials([usernamePassword(credentialsId: 'git-login', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){
-    sh('''
+    withCredentials([sshUserPrivateKey(credentialsId: "jenkins-git-ssh-key", keyFileVariable: 'key')]) {
+        //auth to git here then do some commands for example:
+        sh """        
         cd $WORKSPACE/$BUILD_NUMBER/forked_repo 
         git status 
         sudo -S git commit --allow-empty -m "ReTest-Commit"
-        sudo -S git config --local credential.helper "!f() { echo username=\\$GIT_USERNAME; echo password=\\$GIT_PASSWORD; }; f"
-        sudo -S git push origin $fork_branchName
-    ''')
+        GIT_SSH_COMMAND = "ssh -i $key"
+        sudo -S git push git@github.com:vlakshmanan/$repo_url $fork_branchName
+        """
+    }
 }
-}
+
 pipeline {
     agent any
     options {
