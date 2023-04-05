@@ -213,10 +213,16 @@ def reTest(stageName) {
                 usernameVariable: 'username',
                 passwordVariable: 'password')]){
     sh("cd $WORKSPACE/$BUILD_NUMBER/forked_repo") 
-    sh("git status") 
     sh('sudo -S git commit --allow-empty -m "rerunning the process"')
-    sh("git push http://$username:$password@github.com/scala-computing/WRF.git")
+    sh("sudo -S git push http://$username:$password@github.com/scala-computing/WRF.git")
     }
+    // sh("cd $WORKSPACE/$BUILD_NUMBER/forked_repo")
+    // sshagent(['jenkins-git-ssh-key']) 
+    // {
+    //     sh("git status") 
+    //     sh('sudo -S git commit --allow-empty -m "rerunning the process"')
+    //     sh('git command or program calling git inside') 
+    // }
 }
 
 pipeline {
