@@ -209,20 +209,13 @@ def filterFiles(cmd) {
 
 def reTest(stageName) {
 
-    withCredentials([usernamePassword(credentialsId: 'git-login',
-                usernameVariable: 'username',
-                passwordVariable: 'password')]){
-    sh("cd $WORKSPACE/$BUILD_NUMBER/forked_repo") 
-    sh('sudo -S git commit --allow-empty -m "rerunning the process"')
-    sh("sudo -S git push http://$username:$password@github.com/scala-computing/WRF.git")
+    sh("cd $WORKSPACE/$BUILD_NUMBER/forked_repo")
+    sshagent(['jenkins-git-ssh-key']) 
+    {
+        sh("git status") 
+        sh('sudo -S git commit --allow-empty -m "rerunning the process"')
+        sh("sudo -S sudo -S git push origin $fork_branchName") 
     }
-    // sh("cd $WORKSPACE/$BUILD_NUMBER/forked_repo")
-    // sshagent(['jenkins-git-ssh-key']) 
-    // {
-    //     sh("git status") 
-    //     sh('sudo -S git commit --allow-empty -m "rerunning the process"')
-    //     sh('git command or program calling git inside') 
-    // }
 }
 
 pipeline {
