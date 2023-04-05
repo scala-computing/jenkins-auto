@@ -213,7 +213,7 @@ def reTest(stageName) {
     withCredentials([usernamePassword(credentialsId: 'git-login', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
         sh("git status") 
         sh('sudo -S git commit --allow-empty -m "rerunning the process"')
-        sh("git push https://${GIT_USERNAME}:${GIT_PASSWORD}@$repo_url")
+        sh("git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/scala-computing/WRF.git/")
         }
 }
 
