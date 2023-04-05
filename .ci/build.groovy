@@ -210,12 +210,6 @@ def filterFiles(cmd) {
 def reTest(stageName) {
 
     sh("cd $WORKSPACE/$BUILD_NUMBER/forked_repo")
-    sshagent(['jenkins-git-ssh-key']) 
-    {
-        sh("git status") 
-        sh('sudo -S git commit --allow-empty -m "rerunning the process"')
-        sh("sudo -S sudo -S git push origin $fork_branchName") 
-    }
     withCredentials([usernamePassword(credentialsId: 'git-login', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
         sh("git status") 
         sh('sudo -S git commit --allow-empty -m "rerunning the process"')
