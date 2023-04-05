@@ -208,14 +208,15 @@ def filterFiles(cmd) {
 }
 
 def reTest(stageName) {
-    withCredentials([string(credentialsId: 'vl-git-token', variable: 'gitToken')]) {
-    sh """
+    withCredentials([usernamePassword(credentialsId: 'git-login', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){
+    sh('''
         cd $WORKSPACE/$BUILD_NUMBER/forked_repo 
         git status 
         sudo -S git commit --allow-empty -m "ReTest-Commit"
+        sudo -S git config --local credential.helper "!f() { echo username=\\$GIT_USERNAME; echo password=\\$GIT_PASSWORD; }; f"
         sudo -S git push origin $fork_branchName
-    """
-    }
+    ''')
+}
 }
 pipeline {
     agent any
