@@ -207,16 +207,6 @@ def filterFiles(cmd) {
     return bool
 }
 
-// def reTest(stageName) {
-
-//     sh("cd $WORKSPACE/$BUILD_NUMBER/forked_repo")
-//     withCredentials([usernamePassword(credentialsId: 'git-login', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-//         sh("git status")
-//         sh(' git commit --allow-empty -m "rerunning the process"')
-//         sh("git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/scala-computing/WRF/tree/$fork_branchName")
-//         }
-// }
-
 pipeline {
     agent any
     options {
@@ -245,7 +235,7 @@ pipeline {
                     sh '''
                      mkdir -pv $WORKSPACE/$BUILD_NUMBER
                      chmod 777 -R $WORKSPACE/$BUILD_NUMBER
-                     echo $payload > $WORKSPACE/$BUILD_NUMBER/sample.json | jq .
+                     echo $payload > $WORKSPACE/$BUILD_NUMBER/sample.json
                     '''
                     script {
                         // Baseowner
@@ -391,9 +381,6 @@ pipeline {
                     /*
                     Check for action is open/sycnhronise and continue the build job
                     */
-                    // } else if ( label ==  '"retest"' ) {
-                    //     reTest("Re-running tests").call()
-                    //     println("Detected re-test label, adding an empty comment to trigger a test.")
                         /*
                         Kill the job if neither of the above conditions are true
                         */
