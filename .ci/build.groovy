@@ -250,7 +250,7 @@ pipeline {
                     script {
                         // Baseowner
                         def sh18= """
-                        cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq 'gsub("[\u0000-\u001F]", '.pull_request.base.user.login')'
+                        cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq .pull_request.base.user.login
                         """
                         env.baseowner=mysh(sh18)
                         // pull request number
