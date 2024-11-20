@@ -12,7 +12,7 @@ def appendOutput(stageName) {
                 if [ -d "/tmp/raw_output_$BUILD_NUMBER/" ]
                 then
                     echo "Directory exists."
-                     rm -rfv /tmp/raw_output_$BUILD_NUMBER/
+                    rm -rfv /tmp/raw_output_$BUILD_NUMBER/
                 else
                     echo "/tmp/raw_output_$BUILD_NUMBER/ not found moving on"
                 fi
@@ -20,7 +20,7 @@ def appendOutput(stageName) {
                 if [ -d "/tmp/raw_output_$BUILD_NUMBER/final_output" ]
                 then
                     echo "Directory exists."
-                     rm -rfv /tmp/raw_output_$BUILD_NUMBER/final_output
+                    rm -rfv /tmp/raw_output_$BUILD_NUMBER/final_output
                 else
                     echo "/tmp/raw_output_$BUILD_NUMBER/final_output not found moving on"
                 fi
@@ -28,7 +28,7 @@ def appendOutput(stageName) {
                 if [ -d "/tmp/coop-repo_$BUILD_NUMBER" ]
                 then
                     echo "Directory exists."
-                     rm -rfv /tmp/coop-repo_$BUILD_NUMBER
+                    rm -rfv /tmp/coop-repo_$BUILD_NUMBER
                 else
                     echo "/tmp/coop-repo_$BUILD_NUMBER not found moving on"
                 fi
@@ -36,18 +36,18 @@ def appendOutput(stageName) {
                 if [ -d "/tmp/Success_files_$BUILD_NUMBER" ]
                 then
                     echo "Directory exists."
-                     rm -rfv /tmp/Success_files_$BUILD_NUMBER
+                    rm -rfv /tmp/Success_files_$BUILD_NUMBER
                 else
                     echo "/tmp/Success_files_$BUILD_NUMBER not found moving on"
                 fi
 
-                 mkdir -pv /tmp/raw_output_$BUILD_NUMBER/
-                 mkdir -pv /tmp/raw_output_$BUILD_NUMBER/final_output
-                 mkdir -pv /tmp/coop-repo_$BUILD_NUMBER
-                 mkdir -pv /tmp/Success_files_$BUILD_NUMBER
+                mkdir -pv /tmp/raw_output_$BUILD_NUMBER/
+                mkdir -pv /tmp/raw_output_$BUILD_NUMBER/final_output
+                mkdir -pv /tmp/coop-repo_$BUILD_NUMBER
+                mkdir -pv /tmp/Success_files_$BUILD_NUMBER
 
-                 aws s3 cp s3://wrf-testcase-staging/raw_output/$BUILD_NUMBER/ /tmp/raw_output_$BUILD_NUMBER/ --region us-east-1 --recursive
-                 git clone --branch regression+feature https://github.com/wrf-model/wrf-coop.git /tmp/coop-repo_$BUILD_NUMBER/wrf-coop
+                aws s3 cp s3://wrf-testcase-staging/raw_output/$BUILD_NUMBER/ /tmp/raw_output_$BUILD_NUMBER/ --region us-east-1 --recursive
+                git clone --branch regression+feature https://github.com/wrf-model/wrf-coop.git /tmp/coop-repo_$BUILD_NUMBER/wrf-coop
                 csh /tmp/coop-repo_$BUILD_NUMBER/wrf-coop/build.csh /tmp/coop-repo_$BUILD_NUMBER/wrf-coop /tmp/coop-repo_$BUILD_NUMBER/wrf-coop
                 sh $WORKSPACE/$BUILD_NUMBER/terraform/part.sh
                 """
@@ -75,11 +75,11 @@ def downloadOutput(stageName) {
                 echo $dirpath
                 """
                 sh """
-                 mkdir output_testcase
-                 cp /tmp/raw_output_$BUILD_NUMBER/final_output/* output_testcase/
-                 cp /tmp/raw_output_$BUILD_NUMBER/email_01.txt output_testcase/
-                 cp /tmp/Success_files_$BUILD_NUMBER/* output_testcase/
-                 zip -r $WORKSPACE/$BUILD_NUMBER/wrf_output.zip output_testcase
+                mkdir output_testcase
+                cp /tmp/raw_output_$BUILD_NUMBER/final_output/* output_testcase/
+                cp /tmp/raw_output_$BUILD_NUMBER/email_01.txt output_testcase/
+                cp /tmp/Success_files_$BUILD_NUMBER/* output_testcase/
+                zip -r $WORKSPACE/$BUILD_NUMBER/wrf_output.zip output_testcase
                 """
             }
         }
@@ -116,27 +116,27 @@ def terraformStage(stageName) {
             echo "Appending ${BUILD_NUMBER} in vars.tf"
             echo "These are environment variables for branch and Github repo\n"
             sh """
-             chmod 777 -R $WORKSPACE/$BUILD_NUMBER
-             mkdir -pv $WORKSPACE/$BUILD_NUMBER/WRF
+            chmod 777 -R $WORKSPACE/$BUILD_NUMBER
+            mkdir -pv $WORKSPACE/$BUILD_NUMBER/WRF
             echo "Cloning repo into:   $WORKSPACE/$BUILD_NUMBER/WRF "
-             git clone --single-branch --branch staging https://github.com/scala-computing/jenkins-auto.git $WORKSPACE/$BUILD_NUMBER/WRF
-             sed -i 's/default = "wrf-test"/default = "wrf-test-${BUILD_NUMBER}"/' $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform/vars.tf
+            git clone --single-branch --branch staging https://github.com/scala-computing/jenkins-auto.git $WORKSPACE/$BUILD_NUMBER/WRF
+            sed -i 's/default = "wrf-test"/default = "build-${BUILD_NUMBER}"/' $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform/vars.tf
             """
             if (label=='"DO_KPP_TEST"') {
                 for (int j=0;j<=60;j++) {
                     sh"""
-                     sed -i "3i export GIT_URL=$repo_url\\nexport GIT_BRANCH=$fork_branchName" $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform/wrf_testcase_"$j".sh
-                     sed -i '\$i cd /home/ubuntu/ && bash upload_script.sh output_$j $BUILD_NUMBER' $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform/wrf_testcase_"$j".sh
+                    sed -i "3i export GIT_URL=$repo_url\\nexport GIT_BRANCH=$fork_branchName" $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform/wrf_testcase_"$j".sh
+                    sed -i '\$i cd /home/ubuntu/ && bash upload_script.sh output_$j $BUILD_NUMBER' $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform/wrf_testcase_"$j".sh
                     """
                 }
             } else {
                 sh """
-                 sed -i 's/variable "instance_count" {default = 58 }/variable "instance_count" {default = 60 } /g' $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform/vars.tf
+                sed -i 's/variable "instance_count" {default = 58 }/variable "instance_count" {default = 60 } /g' $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform/vars.tf
                 """
                 for (int j=0;j<=58;j++) {
                     sh"""
-                     sed -i "3i export GIT_URL=$repo_url\\nexport GIT_BRANCH=$fork_branchName" $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform/wrf_testcase_"$j".sh
-                     sed -i '\$i cd /home/ubuntu/ && bash upload_script.sh output_$j $BUILD_NUMBER' $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform/wrf_testcase_"$j".sh
+                    sed -i "3i export GIT_URL=$repo_url\\nexport GIT_BRANCH=$fork_branchName" $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform/wrf_testcase_"$j".sh
+                    sed -i '\$i cd /home/ubuntu/ && bash upload_script.sh output_$j $BUILD_NUMBER' $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform/wrf_testcase_"$j".sh
                     """
                 }
             }
@@ -152,7 +152,7 @@ Func to check if instane with current tag is running or not
 ***/
 def Instanceflag() {
     instanceId="""
-     aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId]' --filters Name=instance-state-name,Values=running  "Name=tag:Name,Values=wrf-test-$BUILD_NUMBER" --region us-east-1
+    aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId]' --filters Name=instance-state-name,Values=running  "Name=tag:Name,Values=wrf_testcase_*_build-$BUILD_NUMBER" --region us-east-1
     """
     instance=sh(script: instanceId, returnStdout: true)
     def running
@@ -174,9 +174,9 @@ def killall_jobs() {
     echo "From kill all jobs"
     echo "${jobname}"
     def rmi = """
-     mkdir -pv $WORKSPACE/$BUILD_NUMBER/WRF
+    mkdir -pv $WORKSPACE/$BUILD_NUMBER/WRF
     echo "Cloning repo into:   $WORKSPACE/$BUILD_NUMBER/WRF "
-     git clone --single-branch --branch staging https://github.com/scala-computing/jenkins-auto.git $WORKSPACE/$BUILD_NUMBER/WRF
+    git clone --single-branch --branch staging https://github.com/scala-computing/jenkins-auto.git $WORKSPACE/$BUILD_NUMBER/WRF
     """
     rm=sh(script: rmi,returnStdout: true)
     def job = Jenkins.instance.getItemByFullName(jobname)
@@ -221,9 +221,9 @@ pipeline {
         stage('Clean Workspace') {
             steps ("Cleaning workspace") {
                 sh '''
-                 rm -rfv $WORKSPACE/$BUILD_NUMBER
-                 rm -rfv $WORKSPACE/wrf_output.zip
-                 rm -rfv /tmp/raw*
+                rm -rfv $WORKSPACE/$BUILD_NUMBER
+                rm -rfv $WORKSPACE/wrf_output.zip
+                rm -rfv /tmp/raw*
                 terraform -v
                 '''
             }
@@ -233,9 +233,10 @@ pipeline {
             steps ("Setting variables") {
                 withCredentials([string(credentialsId: 'ncar-git-token', variable: 'gitToken')]) {
                     sh '''
-                     mkdir -pv $WORKSPACE/$BUILD_NUMBER
-                     chmod 777 -R $WORKSPACE/$BUILD_NUMBER
-                     echo $payload > $WORKSPACE/$BUILD_NUMBER/sample.json
+                    mkdir -pv $WORKSPACE/$BUILD_NUMBER
+                    chmod 777 -R $WORKSPACE/$BUILD_NUMBER
+                    echo $payload > $WORKSPACE/$BUILD_NUMBER/sample.json
+                    cat $WORKSPACE/$BUILD_NUMBER/sample.json
                     '''
                     script {
                         // Baseowner
@@ -258,14 +259,6 @@ pipeline {
                         cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq .pull_request.head.sha
                         """
                         env.sha=mysh(sh14)
-                        // Github status for current build
-                        sh """
-                        curl -s "https://api.GitHub.com/repos/scala-computing/WRF/statuses/$sha" \
-                        -H "Content-Type: application/json" \
-                        -H "Authorization: token $gitToken" \
-                        -X POST \
-                        -d '{"state": "pending","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test running", "target_url": "https://ncarstagingjenkins.scalacomputing.com/job/WRF-Reg-Test/$BUILD_NUMBER/console"}'
-                        """
 
                         def sh1= """
                         cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq .pull_request.id
@@ -316,8 +309,8 @@ pipeline {
                         // Cloning the forked repository
 
                         sh """
-                         mkdir -pv $WORKSPACE/$BUILD_NUMBER/forked_repo
-                         git clone -b $fork_branchName --single-branch $repo_url $WORKSPACE/$BUILD_NUMBER/forked_repo
+                        mkdir -pv $WORKSPACE/$BUILD_NUMBER/forked_repo
+                        git clone -b $fork_branchName --single-branch $repo_url $WORKSPACE/$BUILD_NUMBER/forked_repo
                         git config --global --add safe.directory $WORKSPACE/$BUILD_NUMBER/forked_repo
                         """
                         def sh8= """
@@ -341,6 +334,22 @@ pipeline {
                         println(eMailID.toString())
                         println("Label is")
                         println(label)
+
+                        if (
+                        action == '"opened"' || 
+                        action == '"synchronize"' || 
+                        action == '"reopened"' || 
+                        (action == '"labeled"' && label == '"Retest only"')
+                        ) {
+                        // Github status for current build
+                        sh """
+                        curl -s "https://api.GitHub.com/repos/scala-computing/WRF/statuses/$sha" \
+                        -H "Content-Type: application/json" \
+                        -H "Authorization: token $gitToken" \
+                        -X POST \
+                        -d '{"state": "pending","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test running", "target_url": "https://ncarstagingjenkins.scalacomputing.com/job/WRF-Reg-Test/$BUILD_NUMBER/console"}'
+                        """
+                        }
                     }
                 }
             }
@@ -381,10 +390,17 @@ pipeline {
                     /*
                     Check for action is open/sycnhronise and continue the build job
                     */
-                        /*
-                        Kill the job if neither of the above conditions are true
-                        */
-                    } else if ( action == '"opened"' || action == '"synchronize"' || action == '"reopened"' ) {
+                    /*
+                    Kill the job if neither of the above conditions are true
+                    */
+                    // } else if ( action == '"opened"' || action == '"synchronize"' || action == '"reopened"' ) {
+                    
+                    } else if (
+                        action == '"opened"' || 
+                        action == '"synchronize"' || 
+                        action == '"reopened"' || 
+                        (action == '"labeled"' && label == '"Retest"')
+                    ) {
                         println("Proceeding to another stage because commits have not been found in .md/.txt files and action is open/sycnhronize/reopened")
                         // Running terraform deployment
                         println("Deploying terraform:")
@@ -462,9 +478,9 @@ pipeline {
                             echo "##############Sending E-Mail###############"
                             echo "Recipient is:$eMailID"
                             cd $WORKSPACE/$BUILD_NUMBER &&  unzip $WORKSPACE/$BUILD_NUMBER/wrf_output.zip
-                             python $WORKSPACE/$BUILD_NUMBER/WRF/mail.py $WORKSPACE/$BUILD_NUMBER/wrf_output.zip SUCCESS $JOB_NAME $BUILD_NUMBER  $eMailID $commitID $githubuserName $pullnumber $WORKSPACE/$BUILD_NUMBER/terraform/output_testcase/email_01.txt "$prComment" $E $F $G $H $I $J "$K" "$L" "$M" "$N" "$O" "$P"
+                            python $WORKSPACE/$BUILD_NUMBER/WRF/mail.py $WORKSPACE/$BUILD_NUMBER/wrf_output.zip SUCCESS $JOB_NAME $BUILD_NUMBER  $eMailID $commitID $githubuserName $pullnumber $WORKSPACE/$BUILD_NUMBER/terraform/output_testcase/email_01.txt "$prComment" $E $F $G $H $I $J "$K" "$L" "$M" "$N" "$O" "$P"
                             echo "Cleaning workspace"
-                             rm -rfv $WORKSPACE/$BUILD_NUMBER
+                            rm -rfv $WORKSPACE/$BUILD_NUMBER
                             """
                         } else {
                             sh """
@@ -478,12 +494,12 @@ pipeline {
                             echo "##############Sending E-Mail###############"
                             echo "Recipient is: ncar-dev@scalacomputing.com"
                             cd $WORKSPACE/$BUILD_NUMBER &&  unzip $WORKSPACE/$BUILD_NUMBER/wrf_output.zip
-                             python $WORKSPACE/$BUILD_NUMBER/WRF/mail.py $WORKSPACE/$BUILD_NUMBER/wrf_output.zip SUCCESS $JOB_NAME $BUILD_NUMBER vlakshmanan@scalacomputing.com $commitID $githubuserName $pullnumber $WORKSPACE/$BUILD_NUMBER/terraform/output_testcase/email_01.txt "$prComment" $E $F $G $H $I $J "$K" "$L" "$M" "$N" "$O" "$P"
+                            python $WORKSPACE/$BUILD_NUMBER/WRF/mail.py $WORKSPACE/$BUILD_NUMBER/wrf_output.zip SUCCESS $JOB_NAME $BUILD_NUMBER vlakshmanan@scalacomputing.com $commitID $githubuserName $pullnumber $WORKSPACE/$BUILD_NUMBER/terraform/output_testcase/email_01.txt "$prComment" $E $F $G $H $I $J "$K" "$L" "$M" "$N" "$O" "$P"
                             echo "Cleaning workspace"
-                             rm -rfv $WORKSPACE/$BUILD_NUMBER
-                             rm -rfv /tmp/raw_output_$BUILD_NUMBER
-                             rm -rfv /tmp/coop-repo_$BUILD_NUMBER
-                             rm -rfv /tmp/Success_files_$BUILD_NUMBER
+                            rm -rfv $WORKSPACE/$BUILD_NUMBER
+                            rm -rfv /tmp/raw_output_$BUILD_NUMBER
+                            rm -rfv /tmp/coop-repo_$BUILD_NUMBER
+                            rm -rfv /tmp/Success_files_$BUILD_NUMBER
                             """
                         }
                     }
@@ -502,12 +518,13 @@ pipeline {
                 -X POST \
                 -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test not required.", "target_url": "https://ncarstagingjenkins.scalacomputing.com/job/WRF-Reg-Test/$BUILD_NUMBER/console"}'
                 echo "#############Job Failed############"
-                 /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py  "vlakshmanan@scalacomputing.com,ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: $pullnumber has : Status: Failed" "Jenkins build with commit id $commitID, branch name $fork_branchName by $githubuserName failed. https://ncarstagingjenkins.scalacomputing.com/job/WRF-Reg-Test/$BUILD_NUMBER/console"
+                /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: $pullnumber has : Status: Failed" "Jenkins build with commit id $commitID, branch name $fork_branchName by $githubuserName failed. https://ncarstagingjenkins.scalacomputing.com/job/WRF-Reg-Test/$BUILD_NUMBER/console"
+                
                 echo "Cleaning workspace"
-                 rm -rfv $WORKSPACE/$BUILD_NUMBER
-                 rm -rfv /tmp/raw_output_$BUILD_NUMBER
-                 rm -rfv /tmp/coop-repo_$BUILD_NUMBER
-                 rm -rfv /tmp/Success_files_$BUILD_NUMBER
+                rm -rfv $WORKSPACE/$BUILD_NUMBER
+                rm -rfv /tmp/raw_output_$BUILD_NUMBER
+                rm -rfv /tmp/coop-repo_$BUILD_NUMBER
+                rm -rfv /tmp/Success_files_$BUILD_NUMBER
                 """
             }
         }
@@ -534,13 +551,13 @@ pipeline {
                         -X POST \
                         -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test not required", "target_url": "https://ncarstagingjenkins.scalacomputing.com/job/WRF-Reg-Test/$BUILD_NUMBER/console"}'
                         echo "#############Job Aborted############"
-                         /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: $pullnumber has : Status: Aborted" "Jenkins build triggered by action: $action with, commit id $commitID, branch name $fork_branchName by $githubuserName aborted because WRF regression test not required. https://ncarstagingjenkins.scalacomputing.com/job/WRF-Reg-Test/$BUILD_NUMBER/console"
+                        /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: $pullnumber has : Status: Aborted" "Jenkins build triggered by action: $action with, commit id $commitID, branch name $fork_branchName by $githubuserName aborted because WRF regression test not required. https://ncarstagingjenkins.scalacomputing.com/job/WRF-Reg-Test/$BUILD_NUMBER/console"
                         echo "Cleaning workspace"
                         cd $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform && terraform destroy -auto-approve || true
-                         rm -rfv $WORKSPACE/$BUILD_NUMBER
-                         rm -rfv /tmp/raw_output_$BUILD_NUMBER
-                         rm -rfv /tmp/coop-repo_$BUILD_NUMBER
-                         rm -rfv /tmp/Success_files_$BUILD_NUMBER
+                        rm -rfv $WORKSPACE/$BUILD_NUMBER
+                        rm -rfv /tmp/raw_output_$BUILD_NUMBER
+                        rm -rfv /tmp/coop-repo_$BUILD_NUMBER
+                        rm -rfv /tmp/Success_files_$BUILD_NUMBER
                         """
                     }
                 }
