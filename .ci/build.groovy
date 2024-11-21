@@ -12,7 +12,7 @@ def appendOutput(stageName) {
                 if [ -d "/tmp/raw_output_$BUILD_NUMBER/" ] 
                 then
                     echo "Directory exists."
-                    rm -rfv /tmp/raw_output_$BUILD_NUMBER/ 
+                    sudo -S rm -rfv /tmp/raw_output_$BUILD_NUMBER/ 
                 else
                     echo "/tmp/raw_output_$BUILD_NUMBER/ not found moving on"
                 fi
@@ -20,7 +20,7 @@ def appendOutput(stageName) {
                 if [ -d "/tmp/raw_output_$BUILD_NUMBER/final_output" ] 
                 then
                     echo "Directory exists."
-                    rm -rfv /tmp/raw_output_$BUILD_NUMBER/final_output
+                    sudo -S rm -rfv /tmp/raw_output_$BUILD_NUMBER/final_output
                 else
                     echo "/tmp/raw_output_$BUILD_NUMBER/final_output not found moving on"
                 fi
@@ -28,7 +28,7 @@ def appendOutput(stageName) {
                 if [ -d "/tmp/coop-repo_$BUILD_NUMBER" ] 
                 then
                     echo "Directory exists."
-                    rm -rfv /tmp/coop-repo_$BUILD_NUMBER
+                    sudo -S rm -rfv /tmp/coop-repo_$BUILD_NUMBER
                 else
                     echo "/tmp/coop-repo_$BUILD_NUMBER not found moving on"
                 fi
@@ -36,7 +36,7 @@ def appendOutput(stageName) {
                 if [ -d "/tmp/Success_files_$BUILD_NUMBER" ] 
                 then
                     echo "Directory exists."
-                    rm -rfv /tmp/Success_files_$BUILD_NUMBER
+                    sudo -S rm -rfv /tmp/Success_files_$BUILD_NUMBER
                 else
                     echo "/tmp/Success_files_$BUILD_NUMBER not found moving on"
                 fi
@@ -60,7 +60,7 @@ def appendOutput(stageName) {
         }
     }
 }                
-                //  rm -rfv /tmp/raw_output_$BUILD_NUMBER
+                //  sudo -S rm -rfv /tmp/raw_output_$BUILD_NUMBER
                 //  aws s3 cp s3://wrf-testcase/output/$BUILD_NUMBER/ output_testcase/ --region us-east-1 --recursive
 
 //Download output of test cases
@@ -220,9 +220,9 @@ pipeline {
         stage('Clean Workspace') {
             steps ("Cleaning workspace") {
                 sh '''
-                rm -rfv $WORKSPACE/$BUILD_NUMBER
-                rm -rfv $WORKSPACE/wrf_output.zip
-                rm -rfv /tmp/raw*
+                sudo -S rm -rfv $WORKSPACE/$BUILD_NUMBER
+                sudo -S rm -rfv $WORKSPACE/wrf_output.zip
+                sudo -S rm -rfv /tmp/raw*
                 terraform -v 
                 '''
             }
@@ -477,7 +477,7 @@ pipeline {
                             cd $WORKSPACE/$BUILD_NUMBER &&  unzip $WORKSPACE/$BUILD_NUMBER/wrf_output.zip
                             python $WORKSPACE/$BUILD_NUMBER/WRF/mail.py $WORKSPACE/$BUILD_NUMBER/wrf_output.zip SUCCESS $JOB_NAME $BUILD_NUMBER  $eMailID $commitID $githubuserName $pullnumber $WORKSPACE/$BUILD_NUMBER/terraform/output_testcase/email_01.txt "$prComment" $E $F $G $H $I $J "$K" "$L" "$M" "$N" "$O" "$P"
                             echo "Cleaning workspace"
-                            rm -rfv $WORKSPACE/$BUILD_NUMBER
+                            sudo -S rm -rfv $WORKSPACE/$BUILD_NUMBER
                             """
                         } else {
                             sh """
@@ -493,10 +493,10 @@ pipeline {
                             cd $WORKSPACE/$BUILD_NUMBER && sudo -S unzip $WORKSPACE/$BUILD_NUMBER/wrf_output.zip
                             sudo -S python $WORKSPACE/$BUILD_NUMBER/WRF/mail.py $WORKSPACE/$BUILD_NUMBER/wrf_output.zip SUCCESS $JOB_NAME $BUILD_NUMBER weiwang@ucar.edu $commitID $githubuserName $pullnumber $WORKSPACE/$BUILD_NUMBER/terraform/output_testcase/email_01.txt "$prComment" $E $F $G $H $I $J "$K" "$L" "$M" "$N" "$O" "$P"
                             echo "Cleaning workspace"
-                            rm -rfv $WORKSPACE/$BUILD_NUMBER
-                            rm -rfv /tmp/raw_output_$BUILD_NUMBER
-                            rm -rfv /tmp/coop-repo_$BUILD_NUMBER
-                            rm -rfv /tmp/Success_files_$BUILD_NUMBER
+                            sudo -S rm -rfv $WORKSPACE/$BUILD_NUMBER
+                            sudo -S rm -rfv /tmp/raw_output_$BUILD_NUMBER
+                            sudo -S rm -rfv /tmp/coop-repo_$BUILD_NUMBER
+                            sudo -S rm -rfv /tmp/Success_files_$BUILD_NUMBER
                             """
                         }
                     }
@@ -513,14 +513,14 @@ pipeline {
                 -H "Content-Type: application/json" \
                 -H "Authorization: token $gitToken" \
                 -X POST \
-                -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test not required.", "target_url": "https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
+                -d '{"state": "failed","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test failed.", "target_url": "https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
                 echo "#############Job Failed############"
-                /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com,kkeene@ucar.edu,weiwang@ucar.edu" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: $pullnumber has : Status: Failed" "Jenkins build with commit id $commitID, branch name $fork_branchName by $githubuserName failed. https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console" 
+                sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com,kkeene@ucar.edu,weiwang@ucar.edu" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: $pullnumber has : Status: Failed" "Jenkins build with commit id $commitID, branch name $fork_branchName by $githubuserName failed. https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console" 
                 echo "Cleaning workspace"
-                rm -rfv $WORKSPACE/$BUILD_NUMBER
-                rm -rfv /tmp/raw_output_$BUILD_NUMBER
-                rm -rfv /tmp/coop-repo_$BUILD_NUMBER
-                rm -rfv /tmp/Success_files_$BUILD_NUMBER
+                sudo -S rm -rfv $WORKSPACE/$BUILD_NUMBER
+                sudo -S rm -rfv /tmp/raw_output_$BUILD_NUMBER
+                sudo -S rm -rfv /tmp/coop-repo_$BUILD_NUMBER
+                sudo -S rm -rfv /tmp/Success_files_$BUILD_NUMBER
                 """
             }
         }
@@ -547,13 +547,13 @@ pipeline {
                         -X POST \
                         -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test not required", "target_url": "https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
                         echo "#############Job Aborted############"
-                        /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: $pullnumber has : Status: Aborted" "Jenkins build triggered by action: $action with, commit id $commitID, branch name $fork_branchName by $githubuserName aborted because WRF regression test not required. https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/
+                        sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: $pullnumber has : Status: Aborted" "Jenkins build triggered by action: $action with, commit id $commitID, branch name $fork_branchName by $githubuserName aborted because WRF regression test not required. https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"
                         echo "Cleaning workspace"
                         cd $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform && terraform destroy -auto-approve || true
-                        rm -rfv $WORKSPACE/$BUILD_NUMBER
-                        rm -rfv /tmp/raw_output_$BUILD_NUMBER
-                        rm -rfv /tmp/coop-repo_$BUILD_NUMBER
-                        rm -rfv /tmp/Success_files_$BUILD_NUMBER
+                        sudo -S rm -rfv $WORKSPACE/$BUILD_NUMBER
+                        sudo -S rm -rfv /tmp/raw_output_$BUILD_NUMBER
+                        sudo -S rm -rfv /tmp/coop-repo_$BUILD_NUMBER
+                        sudo -S rm -rfv /tmp/Success_files_$BUILD_NUMBER
                         """
                     }
                 }  
