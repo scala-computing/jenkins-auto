@@ -319,9 +319,15 @@ pipeline {
                         def sh12= """
                         cd $WORKSPACE/$BUILD_NUMBER/forked_repo && git --no-pager show -s --format='%ae' $commitID
                         """
+                        // def labels= """
+                        // cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq '.pull_request.labels[].name'|head -1 || true
                         def labels= """
-                        cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq '.pull_request.labels[].name'|head -1 || true
+                        cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq '.pull_request.labels[].name'
                         """
+                        def retest= """
+                        cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq '[.pull_request.labels[].name] | any(. == "Retest")'
+                        """
+                        env.retest=mysh(retest)
                         env.label=mysh(labels)
                         env.eMailID=mysh(sh12)
                         println("Commit ID is")
@@ -337,7 +343,8 @@ pipeline {
                         action == '"opened"' || 
                         action == '"synchronize"' || 
                         action == '"reopened"' || 
-                        (action == '"labeled"' && label == '"Retest"')
+                        // (action == '"labeled"' && label == '"Retest"')
+                        (action == '"labeled"' && retest == 'true')
                         ) {
                         // Github status for current build
                         sh """
@@ -380,7 +387,16 @@ pipeline {
                     println("##############################################")
 
                     // if(bool ==true || label=='"DO_NO_TEST"'|| label == '"Staging"'|| label != '"Feature"') { // Old if condition changed with enhancements
-                    if ( readme == true || bool == true || label =='"DO_NO_TEST"'|| label == '"Staging"'|| label =='"Previous-pipeline"' || label =='"Davegill-repo"'  ) { // || label !='"New-Repo"'
+                    // if ( readme == true || bool == true || label =='"DO_NO_TEST"'|| label == '"Staging"'|| label =='"Previous-pipeline"' || label =='"Davegill-repo"'  ) 
+                    if ( 
+                        readme == true || 
+                        bool == true || 
+                        label.any { it.contains('"DO_NO_TEST"') } || 
+                        label.any { it.contains('"Staging"') } || 
+                        label.any { it.contains('"Previous-pipeline"') } || 
+                        label.any { it.contains('"Davegill-repo"') }  
+                        // || label !='"New-Repo"'
+                        ) { 
                         println("Entering if condition")
                         killall_jobs()
                         currentBuild.result = 'ABORTED'
@@ -396,7 +412,8 @@ pipeline {
                         action == '"opened"' || 
                         action == '"synchronize"' || 
                         action == '"reopened"' || 
-                        (action == '"labeled"' && label == '"Retest"')
+                        // (action == '"labeled"' && label == '"Retest"')
+                        (action == '"labeled"' && retest == 'true')
                     ) {
                         println("Proceeding to another stage because commits have not been found in .md/.txt files and action is open/sycnhronize/reopened")
                         // Running terraform deployment
@@ -513,9 +530,10 @@ pipeline {
                 -H "Content-Type: application/json" \
                 -H "Authorization: token $gitToken" \
                 -X POST \
-                -d '{"state": "failed","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test failed.", "target_url": "https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
+                -d '{"state": "failure","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test failed.", "target_url": "https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
                 echo "#############Job Failed############"
                 sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com,kkeene@ucar.edu,weiwang@ucar.edu" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: $pullnumber has : Status: Failed" "Jenkins build with commit id $commitID, branch name $fork_branchName by $githubuserName failed. https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console" 
+
                 echo "Cleaning workspace"
                 sudo -S rm -rfv $WORKSPACE/$BUILD_NUMBER
                 sudo -S rm -rfv /tmp/raw_output_$BUILD_NUMBER
