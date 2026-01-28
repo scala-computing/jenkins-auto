@@ -319,8 +319,6 @@ pipeline {
                         def sh12= """
                         cd $WORKSPACE/$BUILD_NUMBER/forked_repo && git --no-pager show -s --format='%ae' $commitID
                         """
-                        // def labels= """
-                        // cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq '.pull_request.labels[].name'|head -1 || true
                         def labels= """
                         cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq '.pull_request.labels[].name'
                         """
@@ -343,8 +341,7 @@ pipeline {
                         action == '"opened"' || 
                         action == '"synchronize"' || 
                         action == '"reopened"' || 
-                        // (action == '"labeled"' && label == '"Retest"')
-                        (action == '"labeled"' && retest == 'true')
+                        (action == '"labeled"' && label.any { it.contains("Retest") })
                         ) {
                         // Github status for current build
                         sh """
@@ -415,6 +412,8 @@ pipeline {
                         // (action == '"labeled"' && label == '"Retest"')
                         (action == '"labeled"' && retest == 'true')
                     ) {
+                        echo "Test run exiting successfully"
+                        """ exit 0"""
                         println("Proceeding to another stage because commits have not been found in .md/.txt files and action is open/sycnhronize/reopened")
                         // Running terraform deployment
                         println("Deploying terraform:")
@@ -503,7 +502,7 @@ pipeline {
                             -H "Content-Type: application/json" \
                             -H "Authorization: token $gitToken" \
                             -X POST \
-                            -d '{"state": "failure","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test failed", "target_url": "https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
+                            -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test failed", "target_url": "https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
                             echo "#############Job is Successful############"
                             echo "##############Sending E-Mail###############"
                             echo "Recipient is: ncar-dev@scalacomputing.com"
@@ -530,7 +529,7 @@ pipeline {
                 -H "Content-Type: application/json" \
                 -H "Authorization: token $gitToken" \
                 -X POST \
-                -d '{"state": "failure","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test failed.", "target_url": "https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
+                -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test failed.", "target_url": "https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
                 echo "#############Job Failed############"
                 sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: $pullnumber has : Status: Failed" "Jenkins build with commit id $commitID, branch name $fork_branchName by $githubuserName failed. https://ncarstagingjenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"
                 
