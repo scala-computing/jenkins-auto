@@ -414,6 +414,7 @@ pipeline {
                         action == '"reopened"' || 
                         // (action == '"labeled"' && label == '"Retest"')
                         (action == '"labeled"' && retest == 'true')
+                        // (action == '"labeled"' && label.any { it.contains('"Retest"') } )
                     ) {
                         println("Proceeding to another stage because commits have not been found in .md/.txt files and action is open/sycnhronize/reopened")
                         // Running terraform deployment
