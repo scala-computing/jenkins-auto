@@ -48,7 +48,12 @@ gh() {   # gh <api path> <outfile> -> 0 on HTTP 200 (retries GitHub's transient 
     code=$(curl -s -m 60 -o "$2" -w '%{http_code}' \
            -H "Authorization: token $gitToken" -H "Accept: application/vnd.github+json" \
            "https://api.github.com$1")
-    [ "$code" = 200 ] && return 0
+    if [ "$code" = 200 ]; then
+      # Delivery IDs are 19-digit numbers; jq 1.5 (CentOS 7) rounds them as floats
+      # (3853158501557731328 -> 3853158501557731300). Quote them so jq keeps them exact.
+      sed -i -E 's/"id": *([0-9]{16,})/"id":"\1"/g' "$2"
+      return 0
+    fi
     case "$code" in 5*|000) sleep $((i * 5)) ;; *) break ;; esac
   done
   echo "GitHub API $1 -> HTTP $code: $(head -c 300 "$2" 2>/dev/null)"
