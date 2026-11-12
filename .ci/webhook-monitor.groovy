@@ -51,7 +51,9 @@ gh() {   # gh <api path> <outfile> -> 0 on HTTP 200 (retries GitHub's transient 
     if [ "$code" = 200 ]; then
       # Delivery IDs are 19-digit numbers; jq 1.5 (CentOS 7) rounds them as floats
       # (3853158501557731328 -> 3853158501557731300). Quote them so jq keeps them exact.
-      sed -i -E 's/"id": *([0-9]{16,})/"id":"\1"/g' "$2"
+      # (\\1 is doubled because this script is inside a Groovy string.)
+      sed -i -E 's/"id": *([0-9]{16,})/"id":"\\1"/g' "$2"
+      jq empty "$2" 2>/dev/null || { echo "GitHub API $1 -> response is not valid JSON"; return 1; }
       return 0
     fi
     case "$code" in 5*|000) sleep $((i * 5)) ;; *) break ;; esac
@@ -92,6 +94,7 @@ rm -f "$STATE_DIR/api_failing"
 
 total=$(jq 'length' "$W/deliveries.json")
 echo "Deliveries returned by GitHub: $total"
+case "$total" in ''|*[!0-9]*) echo "Could not parse the delivery log"; exit 4 ;; esac
 
 # GUIDs that eventually got a 2xx (a successful redelivery reuses the GUID)
 jq -r '[.[] | select(.status_code >= 200 and .status_code < 300) | .guid] | unique | .[]' \
