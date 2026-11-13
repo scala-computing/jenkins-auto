@@ -206,6 +206,10 @@ def filterFiles(cmd) {
     return bool
 }
 
+// Defaults so the post { aborted } block can read these even if the job dies before they are computed
+readme = false
+bool = false
+
 pipeline {
     agent any
     options {
@@ -273,7 +277,7 @@ pipeline {
                         def sh3= """
                         cd $WORKSPACE/$BUILD_NUMBER && cat sample.json | jq .pull_request.head.ref
                         """
-                        fork_branchName=mysh(sh3)
+                        env.fork_branchName=mysh(sh3)
                         println(fork_branchName)
 
                         def sh4= """
@@ -527,13 +531,14 @@ pipeline {
             echo "Job failed. Now sending e-mail notification and cleaning workspace"
 
                 sh """
-                curl -s "https://api.GitHub.com/repos/wrf-model/WRF/statuses/$sha" \
+                curl -s "https://api.GitHub.com/repos/wrf-model/WRF/statuses/${env.sha ?: 'unknown'}" \
                 -H "Content-Type: application/json" \
                 -H "Authorization: token $gitToken" \
                 -X POST \
                 -d '{"state": "failure","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test failed.", "target_url": "https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
                 echo "#############Job Failed############"
-                sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com,kkeene@ucar.edu,weiwang@ucar.edu" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: $pullnumber has : Status: Failed" "Jenkins build with commit id $commitID, branch name $fork_branchName by $githubuserName failed. https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console" 
+                [ -f $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py ] || git clone --single-branch --branch master https://github.com/scala-computing/jenkins-auto.git $WORKSPACE/$BUILD_NUMBER/WRF
+                sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com,kkeene@ucar.edu,weiwang@ucar.edu" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: ${env.pullnumber ?: 'unknown'} has : Status: Failed" "Jenkins build with commit id ${env.commitID ?: 'unknown'}, branch name ${env.fork_branchName ?: 'unknown'} by ${env.githubuserName ?: 'unknown'} failed. https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console" 
 
                 echo "Cleaning workspace"
                 sudo -S rm -rfv $WORKSPACE/$BUILD_NUMBER
@@ -549,7 +554,7 @@ pipeline {
             withCredentials([string(credentialsId: 'ncar-git-token', variable: 'gitToken')]) {
                 script{
                     // if  ( readme == true || bool == true && action == '"labeled"' ||  action == '"unlabeled"' ) {
-                    if (action == '"labeled"' ||  action == '"unlabeled"') {
+                    if (env.action == '"labeled"' ||  env.action == '"unlabeled"') {
                         echo "A label was changed"
                     } else if ( readme == true || bool == true ) {
                         echo "Change was made to a text or README file"
@@ -560,13 +565,14 @@ pipeline {
                         echo "Job Aborted. Now sending e-mail notification and cleaning workspace"   
 
                         sh """
-                        curl -s "https://api.GitHub.com/repos/wrf-model/WRF/statuses/$sha" \
+                        curl -s "https://api.GitHub.com/repos/wrf-model/WRF/statuses/${env.sha ?: 'unknown'}" \
                         -H "Content-Type: application/json" \
                         -H "Authorization: token $gitToken" \
                         -X POST \
                         -d '{"state": "success","context": "WRF-BUILD-$BUILD_NUMBER", "description": "WRF regression test not required", "target_url": "https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"}'
                         echo "#############Job Aborted############"
-                        sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: $pullnumber has : Status: Aborted" "Jenkins build triggered by action: $action with, commit id $commitID, branch name $fork_branchName by $githubuserName aborted because WRF regression test not required. https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"
+                        [ -f $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py ] || git clone --single-branch --branch master https://github.com/scala-computing/jenkins-auto.git $WORKSPACE/$BUILD_NUMBER/WRF
+                        sudo -S /bin/python3.6 $WORKSPACE/$BUILD_NUMBER/WRF/SESEmailHelper.py "vlakshmanan@scalacomputing.com" "ncar-dev@scalacomputing.com" "Jenkins Build $BUILD_NUMBER with Pull request number: ${env.pullnumber ?: 'unknown'} has : Status: Aborted" "Jenkins build triggered by action: ${env.action ?: 'unknown'} with, commit id ${env.commitID ?: 'unknown'}, branch name ${env.fork_branchName ?: 'unknown'} by ${env.githubuserName ?: 'unknown'} aborted because WRF regression test not required. https://ncar_jenkins.scalacomputing.com/job/WRF-Feature-Regression-Test/$BUILD_NUMBER/console"
                         echo "Cleaning workspace"
                         cd $WORKSPACE/$BUILD_NUMBER/WRF/.ci/terraform && terraform destroy -auto-approve || true
                         sudo -S rm -rfv $WORKSPACE/$BUILD_NUMBER
